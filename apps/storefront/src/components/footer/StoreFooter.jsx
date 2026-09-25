@@ -1,4 +1,10 @@
-import { ArrowUpRight, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import {
+  ArrowUpRight,
+  Camera,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const footerLinks = [
@@ -21,6 +27,7 @@ function StoreFooter() {
     <footer className="mt-20 border-t border-border bg-charcoal text-white">
       <div className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 lg:py-18">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
           <div className="lg:pr-10">
             <p className="font-heading text-2xl tracking-[0.08em]">
               BAJWA'S
@@ -44,6 +51,7 @@ function StoreFooter() {
             </a>
           </div>
 
+          {/* Explore */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
               Explore
@@ -62,6 +70,7 @@ function StoreFooter() {
             </nav>
           </div>
 
+          {/* Customer Care */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
               Customer Care
@@ -94,6 +103,7 @@ function StoreFooter() {
             </nav>
           </div>
 
+          {/* Contact */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
               Contact
@@ -102,7 +112,9 @@ function StoreFooter() {
             <div className="mt-5 space-y-4 text-sm text-white/70">
               <div className="flex gap-3">
                 <MapPin size={18} className="mt-0.5 shrink-0" />
-                <span>Business address will be added before production.</span>
+                <span>
+                  Business address will be added before production.
+                </span>
               </div>
 
               <div className="flex gap-3">
@@ -116,22 +128,21 @@ function StoreFooter() {
               </div>
 
               <div className="flex gap-3">
-                <Instagram size={18} className="shrink-0" />
+                <Camera size={18} className="shrink-0" />
                 <span>@bajwascollection</span>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Bottom */}
         <div className="mt-12 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} Bajwa's Collection. All rights
             reserved.
           </p>
 
-          <p className="mt-2 sm:mt-0">
-            Powered by RANI
-          </p>
+          <p className="mt-2 sm:mt-0">Powered by RANI</p>
         </div>
       </div>
     </footer>
