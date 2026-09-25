@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@import "./tokens.css";
+@import "./animations.css";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--rani-background);
+  color: var(--rani-text);
+  font-family: var(--rani-font-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--rani-primary);
+  color: var(--rani-primary-foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rani-primary);
+  outline-offset: 3px;
+}
