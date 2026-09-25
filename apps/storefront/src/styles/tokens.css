@@ -30,8 +30,13 @@
     "Playfair Display", Georgia, "Times New Roman", serif;
 
   --rani-font-body:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 
   /* Layout */
   --rani-container: 1440px;
@@ -59,14 +64,19 @@
   --color-surface: var(--rani-surface);
   --color-surface-muted: var(--rani-surface-muted);
 
+  /* Neutral */
+  --color-charcoal: #171717;
+
   --color-text: var(--rani-text);
   --color-text-muted: var(--rani-text-muted);
   --color-border: var(--rani-border);
 
+  /* Status */
   --color-success: var(--rani-success);
   --color-warning: var(--rani-warning);
   --color-danger: var(--rani-danger);
 
+  /* Typography */
   --font-heading: var(--rani-font-heading);
   --font-body: var(--rani-font-body);
 }

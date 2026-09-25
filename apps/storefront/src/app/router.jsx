@@ -1,11 +1,18 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
+
+import StoreLayout from "../layouts/StoreLayout";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    lazy: async () => ({
-      Component: (await import("../pages/Home")).default,
-    }),
+    element: <StoreLayout />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import("../pages/Home")).default,
+        }),
+      },
+    ],
   },
   {
     path: "*",
