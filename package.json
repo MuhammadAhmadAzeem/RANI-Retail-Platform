@@ -8,8 +8,8 @@
         "dev": "concurrently \"npm run dev --workspace=apps/storefront\" \"npm run dev --workspace=apps/admin\"",
         "dev:storefront": "npm run dev --workspace=apps/storefront",
         "dev:admin": "npm run dev --workspace=apps/admin",
-        "build": "npm run build --workspaces",
-        "lint": "npm run lint --workspaces"
+        "build": "npm run build --workspace=apps/admin && npm run build --workspace=apps/storefront",
+        "lint": "npm run lint --workspace=apps/admin && npm run lint --workspace=apps/storefront"
     },
     "keywords": [],
     "author": "",

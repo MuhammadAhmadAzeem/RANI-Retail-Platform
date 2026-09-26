@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-
 import StoreFooter from "../components/footer/StoreFooter";
 import StoreHeader from "../components/header/StoreHeader";
 
