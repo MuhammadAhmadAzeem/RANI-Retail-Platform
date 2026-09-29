@@ -1,27 +1,36 @@
 import { cn } from "../../lib/cn";
 
+function formatPrice(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return new Intl.NumberFormat("en-PK", {
+    style: "currency",
+    currency: "PKR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function Price({
   price,
   compareAtPrice,
-  currency = "PKR",
   className,
   priceClassName,
   comparePriceClassName,
+  showDiscount = true,
 }) {
-  const formattedPrice = new Intl.NumberFormat("en-PK", {
-    maximumFractionDigits: 0,
-  }).format(price);
+  const hasDiscount =
+    typeof compareAtPrice === "number" &&
+    compareAtPrice > price;
 
-  const formattedComparePrice =
-    compareAtPrice !== null &&
-    compareAtPrice !== undefined &&
-    compareAtPrice > price
-      ? new Intl.NumberFormat("en-PK", {
-          maximumFractionDigits: 0,
-        }).format(compareAtPrice)
-      : null;
-
-  const currencyLabel = currency === "PKR" ? "Rs." : currency;
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((compareAtPrice - price) /
+          compareAtPrice) *
+          100
+      )
+    : 0;
 
   return (
     <div
@@ -32,22 +41,30 @@ function Price({
     >
       <span
         className={cn(
-          "text-sm font-semibold tracking-tight text-text",
+          "text-sm font-semibold text-text sm:text-base",
           priceClassName
         )}
       >
-        {currencyLabel} {formattedPrice}
+        {formatPrice(price)}
       </span>
 
-      {formattedComparePrice && (
-        <span
-          className={cn(
-            "text-xs text-text-muted line-through",
-            comparePriceClassName
+      {hasDiscount && (
+        <>
+          <span
+            className={cn(
+              "text-xs text-text-muted line-through sm:text-sm",
+              comparePriceClassName
+            )}
+          >
+            {formatPrice(compareAtPrice)}
+          </span>
+
+          {showDiscount && (
+            <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-primary">
+              {discountPercentage}% Off
+            </span>
           )}
-        >
-          {currencyLabel} {formattedComparePrice}
-        </span>
+        </>
       )}
     </div>
   );

@@ -1,172 +1,519 @@
 import {
+  Check,
   ChevronDown,
-  Grid2X2,
-  List,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  useSearchParams,
+} from "react-router-dom";
 
-const categories = [
-  "All",
-  "Women",
-  "Men",
-  "Unstitched",
+import Breadcrumbs from "../components/common/Breadcrumbs";
+import SearchBar from "../components/common/SearchBar";
+import ProductGrid from "../components/ecommerce/ProductGrid";
+import categories from "../data/mock/categories";
+import collections from "../data/mock/collections";
+import useProducts from "../hooks/useProducts";
+
+const priceOptions = [
+  {
+    value: "all",
+    label: "All Prices",
+  },
+  {
+    value: "under-5000",
+    label: "Under PKR 5,000",
+  },
+  {
+    value: "5000-10000",
+    label: "PKR 5,000 – 10,000",
+  },
+  {
+    value: "10000-20000",
+    label: "PKR 10,000 – 20,000",
+  },
+  {
+    value: "above-20000",
+    label: "Above PKR 20,000",
+  },
 ];
 
-const collections = [
-  "New In",
-  "Signature",
-  "Festive",
+const sortOptions = [
+  {
+    value: "featured",
+    label: "Featured",
+  },
+  {
+    value: "newest",
+    label: "Newest",
+  },
+  {
+    value: "price-asc",
+    label: "Price: Low to High",
+  },
+  {
+    value: "price-desc",
+    label: "Price: High to Low",
+  },
+  {
+    value: "name-asc",
+    label: "Name: A to Z",
+  },
 ];
+
+function getCategoryLabel(category) {
+  return category.name || category.title || category.label;
+}
+
+function getCollectionLabel(collection) {
+  return collection.name || collection.title || collection.label;
+}
 
 function Shop() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const query = searchParams.get("q") || "";
+  const category = searchParams.get("category") || "";
+  const collection = searchParams.get("collection") || "";
+  const price = searchParams.get("price") || "all";
+  const sort = searchParams.get("sort") || "featured";
+
+  const {
+    products,
+    total,
+  } = useProducts({
+    query,
+    category,
+    collection,
+    price,
+    sort,
+  });
+
+  const selectedCategory = useMemo(
+    () =>
+      categories.find(
+        (item) => item.slug === category
+      ),
+    [category]
+  );
+
+  const selectedCollection = useMemo(
+    () =>
+      collections.find(
+        (item) => item.slug === collection
+      ),
+    [collection]
+  );
+
+  const updateParams = useCallback(
+    (updates, options = {}) => {
+      const nextParams = new URLSearchParams(
+        searchParams
+      );
+
+      Object.entries(updates).forEach(
+        ([key, value]) => {
+          if (
+            value === undefined ||
+            value === null ||
+            value === "" ||
+            value === "all"
+          ) {
+            nextParams.delete(key);
+          } else {
+            nextParams.set(key, value);
+          }
+        }
+      );
+
+      if (options.resetPage !== false) {
+        nextParams.delete("page");
+      }
+
+      setSearchParams(nextParams);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleSearch = useCallback(
+    (value) => {
+      updateParams({
+        q: value,
+      });
+    },
+    [updateParams]
+  );
+
+  const clearAllFilters = useCallback(() => {
+    setSearchParams({});
+  }, [setSearchParams]);
+
+  const hasActiveFilters =
+    Boolean(query) ||
+    Boolean(category) ||
+    Boolean(collection) ||
+    price !== "all" ||
+    sort !== "featured";
+
+  const activeFilterCount =
+    Number(Boolean(query)) +
+    Number(Boolean(category)) +
+    Number(Boolean(collection)) +
+    Number(price !== "all") +
+    Number(sort !== "featured");
+
   return (
-    <main className="bg-background">
-      {/* Header */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-[1440px] px-5 pb-10 pt-14 sm:px-8 sm:pt-16 lg:pb-12 lg:pt-20">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-text-muted">
-            <Link to="/" className="transition hover:text-primary">
-              Home
-            </Link>
+    <main className="min-h-screen bg-background">
+      <section className="border-b border-border bg-surface">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+          <Breadcrumbs
+            items={[
+              {
+                label: "Shop",
+                href: "/shop",
+              },
+            ]}
+          />
 
-            <span className="text-border">/</span>
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Bajwa&apos;s Collection
+            </p>
 
-            <span className="text-primary">Shop</span>
-          </div>
+            <h1 className="mt-3 font-serif text-4xl font-medium tracking-tight text-text sm:text-5xl">
+              {selectedCategory
+                ? getCategoryLabel(selectedCategory)
+                : selectedCollection
+                  ? getCollectionLabel(
+                      selectedCollection
+                    )
+                  : "Shop"}
+            </h1>
 
-          <div className="mt-8 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-                The collection
-              </p>
-
-              <h1 className="mt-3 font-heading text-5xl font-medium leading-[1.05] tracking-tight sm:text-6xl">
-                Shop the latest
-              </h1>
-
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-text-muted sm:text-base">
-                Discover contemporary Pakistani fashion across refined
-                everyday, festive and unstitched collections
-              </p>
-            </div>
-
-            <p className="text-sm text-text-muted">
-              Curated selections for every wardrobe
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted sm:text-base">
+              Explore curated Pakistani fashion pieces
+              crafted for everyday elegance and timeless
+              style
             </p>
           </div>
         </div>
       </section>
 
-      {/* Toolbar */}
-      <section className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-5 py-4 sm:px-8 md:flex-row md:items-center md:justify-between">
-          <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
-            {categories.map((category, index) => (
-              <button
-                key={category}
-                type="button"
-                className={
-                  index === 0
-                    ? "whitespace-nowrap rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-                    : "whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 text-xs font-medium text-text-muted transition hover:border-primary hover:text-primary"
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="w-full lg:max-w-md">
+            <SearchBar
+              defaultValue={query}
+              placeholder="Search products by name"
+              onSearch={handleSearch}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label
+              htmlFor="sort-products"
+              className="hidden text-sm font-medium text-text-muted sm:block"
+            >
+              Sort by
+            </label>
+
+            <div className="relative w-full sm:w-auto">
+              <select
+                id="sort-products"
+                value={sort}
+                onChange={(event) =>
+                  updateParams({
+                    sort: event.target.value,
+                  })
                 }
+                className="h-11 w-full appearance-none rounded-full border border-border bg-surface px-4 pr-10 text-sm font-medium text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 sm:w-52"
               >
-                {category}
-              </button>
-            ))}
-          </div>
+                {sortOptions.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-surface px-4 text-xs font-semibold transition hover:border-primary hover:text-primary"
-            >
-              <SlidersHorizontal size={15} />
-              Filters
-            </button>
-
-            <button
-              type="button"
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-surface px-4 text-xs font-semibold transition hover:border-primary hover:text-primary"
-            >
-              Sort
-              <ChevronDown size={15} />
-            </button>
-
-            <div className="hidden items-center gap-1 rounded-full border border-border bg-surface p-1 sm:flex">
-              <button
-                type="button"
-                aria-label="Grid view"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white"
-              >
-                <Grid2X2 size={15} />
-              </button>
-
-              <button
-                type="button"
-                aria-label="List view"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition hover:text-primary"
-              >
-                <List size={15} />
-              </button>
+              <ChevronDown
+                size={17}
+                aria-hidden="true"
+                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+              />
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Collection links */}
-      <section className="mx-auto max-w-[1440px] px-5 pt-8 sm:px-8">
-        <div className="flex items-center gap-3 overflow-x-auto pb-2">
-          <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
-            Explore
-          </span>
+        <div className="mt-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            type="button"
+            onClick={() =>
+              updateParams({
+                category: "",
+              })
+            }
+            className={`inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-xs font-semibold transition ${
+              !category
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-surface text-text hover:border-primary/40 hover:text-primary"
+            }`}
+          >
+            All
+          </button>
 
-          {collections.map((collection) => (
-            <Link
-              key={collection}
-              to={`/collection/${collection.toLowerCase().replaceAll(" ", "-")}`}
-              className="shrink-0 text-sm text-text transition hover:text-primary"
-            >
-              {collection}
-            </Link>
-          ))}
+          {categories.map((item) => {
+            const isActive = item.slug === category;
+
+            return (
+              <button
+                key={item.slug}
+                type="button"
+                onClick={() =>
+                  updateParams({
+                    category: isActive
+                      ? ""
+                      : item.slug,
+                  })
+                }
+                className={`inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-xs font-semibold transition ${
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-surface text-text hover:border-primary/40 hover:text-primary"
+                }`}
+              >
+                {getCategoryLabel(item)}
+              </button>
+            );
+          })}
         </div>
-      </section>
 
-      {/* Empty catalogue state */}
-      <section className="mx-auto max-w-[1440px] px-5 pb-24 pt-12 sm:px-8 lg:pb-28">
-        <div className="relative overflow-hidden border border-border bg-surface">
-          <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-linear-to-l from-primary/10 to-transparent lg:block" />
+        <div className="sticky top-0 z-20 mt-6 border-y border-border bg-background/95 py-4 backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <SlidersHorizontal
+                size={18}
+                aria-hidden="true"
+                className="text-primary"
+              />
 
-          <div className="relative mx-auto max-w-2xl px-6 py-24 text-center sm:px-10 lg:py-28">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
-              <Grid2X2 size={21} />
+              <p className="text-sm text-text-muted">
+                <span className="font-semibold text-text">
+                  {total}
+                </span>{" "}
+                {total === 1
+                  ? "product"
+                  : "products"}
+              </p>
+
+              {activeFilterCount > 0 && (
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-2 text-[11px] font-bold text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
             </div>
 
-            <p className="mt-7 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Catalogue
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {category && (
+                <FilterTag
+                  label={getCategoryLabel(
+                    selectedCategory || {
+                      name: category,
+                    }
+                  )}
+                  onRemove={() =>
+                    updateParams({
+                      category: "",
+                    })
+                  }
+                />
+              )}
 
-            <h2 className="mt-3 font-heading text-3xl font-medium sm:text-4xl">
-              Curated pieces are on their way
-            </h2>
+              {collection && (
+                <FilterTag
+                  label={getCollectionLabel(
+                    selectedCollection || {
+                      name: collection,
+                    }
+                  )}
+                  onRemove={() =>
+                    updateParams({
+                      collection: "",
+                    })
+                  }
+                />
+              )}
 
-            <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-text-muted sm:text-base">
-              The storefront catalogue is being prepared for the RANI product
-              system
-            </p>
+              {price !== "all" && (
+                <FilterTag
+                  label={
+                    priceOptions.find(
+                      (option) =>
+                        option.value === price
+                    )?.label || price
+                  }
+                  onRemove={() =>
+                    updateParams({
+                      price: "all",
+                    })
+                  }
+                />
+              )}
 
-            <Link
-              to="/"
-              className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white transition hover:bg-primary-hover"
-            >
-              Back to home
-            </Link>
+              {query && (
+                <FilterTag
+                  label={`"${query}"`}
+                  onRemove={() =>
+                    updateParams({
+                      q: "",
+                    })
+                  }
+                />
+              )}
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-semibold text-primary transition hover:bg-primary/5"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <FilterSelect
+              label="Collection"
+              value={collection}
+              onChange={(value) =>
+                updateParams({
+                  collection: value,
+                })
+              }
+            >
+              <option value="">
+                All Collections
+              </option>
+
+              {collections.map((item) => (
+                <option
+                  key={item.slug}
+                  value={item.slug}
+                >
+                  {getCollectionLabel(item)}
+                </option>
+              ))}
+            </FilterSelect>
+
+            <FilterSelect
+              label="Price"
+              value={price}
+              onChange={(value) =>
+                updateParams({
+                  price: value,
+                })
+              }
+            >
+              {priceOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </option>
+              ))}
+            </FilterSelect>
+
+            <div className="hidden items-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 lg:flex">
+              <Check
+                size={17}
+                aria-hidden="true"
+                className="text-success"
+              />
+
+              <span className="text-sm text-text-muted">
+                Showing available products
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="py-8 sm:py-10">
+          <ProductGrid
+            products={products}
+            showQuickAdd
+          />
         </div>
       </section>
     </main>
+  );
+}
+
+function FilterTag({ label, onRemove }) {
+  return (
+    <span className="inline-flex h-8 items-center gap-2 rounded-full border border-border bg-surface px-3 text-xs font-medium text-text">
+      <span className="max-w-40 truncate">
+        {label}
+      </span>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
+        className="text-text-muted transition hover:text-danger"
+      >
+        <X size={14} />
+      </button>
+    </span>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  children,
+}) {
+  const id = `shop-filter-${label
+    .toLowerCase()
+    .replace(/\s+/g, "-")}`;
+
+  return (
+    <div className="relative">
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted"
+      >
+        {label}
+      </label>
+
+      <div className="relative">
+        <select
+          id={id}
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
+          className="h-11 w-full appearance-none rounded-xl border border-border bg-surface px-4 pr-10 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+        >
+          {children}
+        </select>
+
+        <ChevronDown
+          size={16}
+          aria-hidden="true"
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+        />
+      </div>
+    </div>
   );
 }
 

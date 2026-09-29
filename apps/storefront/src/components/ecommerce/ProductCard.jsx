@@ -1,44 +1,87 @@
 import {
   Heart,
-  ShoppingBag,
+  Plus,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import {
+  Link,
+} from "react-router-dom";
 
 import Price from "../common/Price";
-import { cn } from "../../lib/cn";
+
+function getProductImage(product) {
+  if (Array.isArray(product.images)) {
+    const firstImage = product.images[0];
+
+    if (typeof firstImage === "string") {
+      return firstImage;
+    }
+
+    if (firstImage?.url) {
+      return firstImage.url;
+    }
+
+    if (firstImage?.src) {
+      return firstImage.src;
+    }
+  }
+
+  return product.image || product.imageUrl || "";
+}
+
+function getProductCategory(product) {
+  if (typeof product.category === "string") {
+    return product.category;
+  }
+
+  return (
+    product.category?.name ||
+    product.category?.title ||
+    ""
+  );
+}
+
+function getStockState(product) {
+  if (
+    product.stock === 0 ||
+    product.stockStatus === "out-of-stock" ||
+    product.available === false
+  ) {
+    return "sold-out";
+  }
+
+  if (
+    product.stockStatus === "low-stock" ||
+    (typeof product.stock === "number" &&
+      product.stock > 0 &&
+      product.stock <= 5)
+  ) {
+    return "low-stock";
+  }
+
+  return "available";
+}
 
 function ProductCard({
   product,
-  onWishlistToggle,
   isWishlisted = false,
-  showQuickAdd = true,
-  className,
+  onWishlistToggle,
+  showQuickAdd = false,
 }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const image = getProductImage(product);
+  const category = getProductCategory(product);
+  const stockState = getStockState(product);
 
-  if (!product) {
-    return null;
-  }
+  const hasComparePrice =
+    typeof product.compareAtPrice === "number" &&
+    product.compareAtPrice > product.price;
 
-  const {
-    name,
-    slug,
-    category,
-    price,
-    compareAtPrice,
-    currency,
-    images = [],
-    badge,
-    availability,
-  } = product;
+  const badge =
+    product.badge ||
+    product.label ||
+    (product.isNew ? "New In" : null);
 
-  const image = images[0];
-
-  const isLowStock = availability === "low-stock";
-  const isOutOfStock = availability === "out-of-stock";
-
-  const productUrl = `/product/${slug}`;
+  const isSoldOut = stockState === "sold-out";
+  const isLowStock = stockState === "low-stock";
 
   const handleWishlistClick = (event) => {
     event.preventDefault();
@@ -47,139 +90,137 @@ function ProductCard({
     onWishlistToggle?.(product);
   };
 
-  const handleQuickAddClick = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Cart functionality will be connected in the cart milestone
-  };
-
   return (
-    <article
-      className={cn(
-        "group min-w-0",
-        className
-      )}
-    >
-      <div className="relative">
+    <article className="group min-w-0">
+      <div className="relative overflow-hidden rounded-2xl bg-surface-muted">
         <Link
-          to={productUrl}
-          aria-label={`View ${name}`}
+          to={`/product/${product.slug}`}
+          aria-label={`View ${product.name}`}
           className="block"
         >
-          <div className="relative aspect-[3/4] overflow-hidden bg-surface-muted">
-            {!imageLoaded && (
-              <div className="absolute inset-0 animate-pulse-soft bg-surface-muted" />
-            )}
-
+          <div className="aspect-[3/4] overflow-hidden">
             {image ? (
               <img
                 src={image}
-                alt={name}
-                width="900"
-                height="1200"
+                alt={product.imageAlt || product.name}
                 loading="lazy"
-                decoding="async"
-                onLoad={() => setImageLoaded(true)}
-                className={cn(
-                  "h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.025]",
-                  imageLoaded
-                    ? "opacity-100"
-                    : "opacity-0"
-                )}
+                width="600"
+                height="800"
+                className={`h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03] ${
+                  isSoldOut
+                    ? "opacity-55 grayscale-[0.2]"
+                    : ""
+                }`}
               />
             ) : (
-              <div className="flex h-full items-center justify-center px-5 text-center">
-                <span className="text-xs uppercase tracking-[0.16em] text-text-muted">
-                  Image unavailable
-                </span>
-              </div>
-            )}
-
-            <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-              {badge && (
-                <span className="bg-primary px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-foreground">
-                  {badge}
-                </span>
-              )}
-
-              {isLowStock && !badge && (
-                <span className="bg-warning px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
-                  Low Stock
-                </span>
-              )}
-
-              {isOutOfStock && (
-                <span className="bg-charcoal px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
-                  Sold Out
-                </span>
-              )}
-            </div>
-
-            <div className="absolute right-3 top-3">
-              <button
-                type="button"
-                onClick={handleWishlistClick}
-                aria-label={
-                  isWishlisted
-                    ? `Remove ${name} from wishlist`
-                    : `Add ${name} to wishlist`
-                }
-                aria-pressed={isWishlisted}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-200",
-                  isWishlisted
-                    ? "border-primary bg-primary text-white"
-                    : "border-white/60 bg-white/85 text-text hover:border-primary hover:text-primary"
-                )}
+              <div
+                className="flex h-full w-full items-center justify-center bg-surface-muted text-xs text-text-muted"
+                aria-label={product.name}
               >
-                <Heart
-                  size={17}
-                  fill={isWishlisted ? "currentColor" : "none"}
-                />
-              </button>
-            </div>
-
-            {showQuickAdd && !isOutOfStock && (
-              <div className="absolute inset-x-3 bottom-3 hidden translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:block">
-                <button
-                  type="button"
-                  onClick={handleQuickAddClick}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-charcoal shadow-lg transition hover:bg-primary hover:text-white"
-                >
-                  <ShoppingBag size={16} />
-                  Quick add
-                </button>
+                Image unavailable
               </div>
             )}
           </div>
         </Link>
 
-        {isOutOfStock && (
-          <div className="pointer-events-none absolute inset-0 bg-white/15" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
+          <div className="flex flex-col gap-2">
+            {badge && (
+              <span className="rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground shadow-sm">
+                {badge}
+              </span>
+            )}
+
+            {isLowStock && !isSoldOut && (
+              <span className="w-fit rounded-full bg-surface px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-warning shadow-sm">
+                Low Stock
+              </span>
+            )}
+
+            {isSoldOut && (
+              <span className="w-fit rounded-full bg-text px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground shadow-sm">
+                Sold Out
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleWishlistClick}
+            aria-label={
+              isWishlisted
+                ? `Remove ${product.name} from wishlist`
+                : `Add ${product.name} to wishlist`
+            }
+            aria-pressed={isWishlisted}
+            className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-200 ${
+              isWishlisted
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-white/70 bg-white/90 text-text hover:border-primary hover:text-primary"
+            }`}
+          >
+            <Heart
+              size={17}
+              strokeWidth={isWishlisted ? 2.5 : 1.9}
+              fill={
+                isWishlisted
+                  ? "currentColor"
+                  : "none"
+              }
+            />
+          </button>
+        </div>
+
+        {showQuickAdd && !isSoldOut && (
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 opacity-0 transition duration-300 group-hover:pointer-events-auto group-hover:opacity-100 max-sm:hidden">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-surface/95 px-4 text-xs font-bold uppercase tracking-[0.08em] text-text shadow-lg backdrop-blur-md transition hover:bg-primary hover:text-primary-foreground"
+            >
+              <Plus size={15} />
+              Quick Add
+            </button>
+          </div>
         )}
       </div>
 
-      <Link
-        to={productUrl}
-        className="mt-4 block"
-      >
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted">
-          {category}
-        </p>
+      <div className="pt-4">
+        {category && (
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted">
+            {category}
+          </p>
+        )}
 
-        <h3 className="mt-1.5 line-clamp-2 text-sm font-medium leading-6 text-text transition-colors duration-200 group-hover:text-primary sm:text-base">
-          {name}
-        </h3>
+        <Link
+          to={`/product/${product.slug}`}
+          className="mt-1 block"
+        >
+          <h2 className="line-clamp-2 text-sm font-semibold leading-5 text-text transition-colors group-hover:text-primary sm:text-[15px]">
+            {product.name}
+          </h2>
+        </Link>
 
-        <Price
-          price={price}
-          compareAtPrice={compareAtPrice}
-          currency={currency}
-          className="mt-2"
-          priceClassName="text-sm sm:text-base"
-        />
-      </Link>
+        <div className="mt-2">
+          <Price
+            price={product.price}
+            compareAtPrice={
+              hasComparePrice
+                ? product.compareAtPrice
+                : undefined
+            }
+          />
+        </div>
+
+        {isLowStock && !isSoldOut && (
+          <p className="mt-1.5 text-[11px] font-medium text-warning">
+            Only {product.stock} left
+          </p>
+        )}
+      </div>
     </article>
   );
 }

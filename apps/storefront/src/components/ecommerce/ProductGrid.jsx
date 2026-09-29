@@ -6,24 +6,16 @@ function ProductGrid({
   emptyMessage = "No products found",
   onWishlistToggle,
   wishlistItems = [],
-  showQuickAdd = true,
+  showQuickAdd = false,
   className = "",
 }) {
   if (loading) {
     return (
       <div
-        className={`grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${className}`}
+        className={`grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 lg:grid-cols-3 xl:grid-cols-4 ${className}`}
       >
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="min-w-0">
-            <div className="aspect-[3/4] animate-pulse bg-surface-muted" />
-
-            <div className="mt-4 h-3 w-20 animate-pulse bg-surface-muted" />
-
-            <div className="mt-2 h-5 w-3/4 animate-pulse bg-surface-muted" />
-
-            <div className="mt-3 h-4 w-24 animate-pulse bg-surface-muted" />
-          </div>
+          <ProductSkeleton key={index} />
         ))}
       </div>
     );
@@ -31,18 +23,17 @@ function ProductGrid({
 
   if (!products.length) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center border border-border bg-surface px-6 text-center">
+      <div
+        className={`flex min-h-80 items-center justify-center rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center ${className}`}
+      >
         <div className="max-w-md">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Collection
+          <p className="font-serif text-2xl font-medium text-text">
+            {emptyMessage}
           </p>
 
-          <h2 className="mt-3 font-heading text-3xl font-medium text-text sm:text-4xl">
-            {emptyMessage}
-          </h2>
-
-          <p className="mt-4 text-sm leading-7 text-text-muted">
-            Try another category, collection or search term
+          <p className="mt-2 text-sm leading-6 text-text-muted">
+            Try changing your search or removing some
+            filters to see more products
           </p>
         </div>
       </div>
@@ -51,25 +42,39 @@ function ProductGrid({
 
   return (
     <div
-      className={`grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-5 sm:gap-y-12 lg:grid-cols-3 xl:grid-cols-4 ${className}`}
+      className={`grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4 ${className}`}
     >
       {products.map((product) => {
-        const isWishlisted = wishlistItems.some(
-          (item) =>
-            item?.id === product.id ||
-            item?.slug === product.slug
+        const isWishlisted = wishlistItems.includes(
+          product.id
         );
 
         return (
           <ProductCard
             key={product.id}
             product={product}
-            onWishlistToggle={onWishlistToggle}
             isWishlisted={isWishlisted}
+            onWishlistToggle={onWishlistToggle}
             showQuickAdd={showQuickAdd}
           />
         );
       })}
+    </div>
+  );
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-surface-muted" />
+
+      <div className="space-y-3 pt-4">
+        <div className="h-3 w-20 rounded-full bg-surface-muted" />
+
+        <div className="h-4 w-4/5 rounded-full bg-surface-muted" />
+
+        <div className="h-4 w-24 rounded-full bg-surface-muted" />
+      </div>
     </div>
   );
 }
