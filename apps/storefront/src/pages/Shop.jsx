@@ -432,17 +432,27 @@ function Shop() {
               ))}
             </FilterSelect>
 
-            <div className="hidden items-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 lg:flex">
-              <Check
-                size={17}
-                aria-hidden="true"
-                className="text-success"
-              />
+        <div className="hidden lg:block">
+  {/* Same space as Collection / Price label */}
+  <div className="mb-1.5 h-[15px]" aria-hidden="true" />
 
-              <span className="text-sm text-text-muted">
-                Showing available products
-              </span>
-            </div>
+  <div className="flex h-11 w-full items-center gap-3 rounded-full border border-primary/20 bg-primary/[0.035] px-5 shadow-sm">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+      <Check
+        size={16}
+        strokeWidth={2.5}
+        aria-hidden="true"
+        className="text-primary"
+      />
+    </span>
+
+    <span className="text-sm font-semibold text-text">
+      Available products
+    </span>
+
+    <span className="ml-1 h-2 w-2 rounded-full bg-primary" />
+  </div>
+</div>
           </div>
         </div>
 
