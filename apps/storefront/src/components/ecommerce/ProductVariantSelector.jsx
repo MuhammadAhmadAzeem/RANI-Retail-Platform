@@ -1,101 +1,69 @@
-import { useState } from "react";
-import { cn } from "../../lib/cn";
+import { Check } from "lucide-react";
 
 function ProductVariantSelector({
   sizes = [],
   colors = [],
-  selectedSize: controlledSize,
-  selectedColor: controlledColor,
+  selectedSize = "",
+  selectedColor = "",
   onSizeChange,
   onColorChange,
-  showLabels = true,
-  className,
+  onSizeGuide,
 }) {
-  const [internalSize, setInternalSize] = useState(sizes[0] ?? null);
-  const [internalColor, setInternalColor] = useState(colors[0] ?? null);
-
-  const firstSize = sizes[0] ?? null;
-  const firstColor = colors[0] ?? null;
-
-  const internalSizeIsValid =
-    internalSize && sizes.includes(internalSize);
-
-  const internalColorIsValid =
-    internalColor &&
-    colors.some((color) => color?.name === internalColor?.name);
-
-  const selectedSize =
-    controlledSize !== undefined
-      ? controlledSize
-      : internalSizeIsValid
-        ? internalSize
-        : firstSize;
-
-  const selectedColor =
-    controlledColor !== undefined
-      ? controlledColor
-      : internalColorIsValid
-        ? internalColor
-        : firstColor;
-
-  const handleSizeChange = (size) => {
-    if (controlledSize === undefined) {
-      setInternalSize(size);
-    }
-
-    onSizeChange?.(size);
-  };
-
-  const handleColorChange = (color) => {
-    if (controlledColor === undefined) {
-      setInternalColor(color);
-    }
-
-    onColorChange?.(color);
-  };
-
   return (
-    <div className={cn("space-y-7", className)}>
-      {/* Size */}
-      {sizes.length > 0 && (
+    <div className="space-y-7">
+      {/* Color */}
+      {colors.length > 0 && (
         <div>
-          {showLabels && (
+          <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-text">
-                Size
+                Color
               </p>
 
               <p className="mt-1 text-xs text-text-muted">
-                {selectedSize
-                  ? `Selected: ${selectedSize}`
-                  : "Select a size"}
+                Choose your preferred shade
               </p>
             </div>
-          )}
 
-          <div
-            className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-5"
-            role="radiogroup"
-            aria-label="Product sizes"
-          >
-            {sizes.map((size) => {
-              const isSelected = selectedSize === size;
+            <span className="rounded-full bg-surface-muted px-3 py-1.5 text-xs font-medium text-text">
+              {selectedColor || "Select a color"}
+            </span>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            {colors.map((color) => {
+              const isSelected =
+                selectedColor === color.name;
 
               return (
                 <button
-                  key={size}
+                  key={color.name}
                   type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  onClick={() => handleSizeChange(size)}
-                  className={cn(
-                    "flex h-11 items-center justify-center rounded-full border text-sm font-medium transition-all duration-200",
+                  onClick={() => onColorChange?.(color.name)}
+                  aria-label={`Select ${color.name}`}
+                  aria-pressed={isSelected}
+                  className={`flex h-11 items-center gap-2.5 rounded-full border px-4 text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
                     isSelected
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border bg-surface text-text hover:border-primary hover:text-primary"
-                  )}
+                      ? "border-primary bg-primary/5 text-primary shadow-sm"
+                      : "border-border bg-background text-text hover:border-primary/40 hover:bg-surface-muted"
+                  }`}
                 >
-                  {size}
+                  <span
+                    aria-hidden="true"
+                    className="h-5 w-5 rounded-full border border-black/10 shadow-inner"
+                    style={{
+                      backgroundColor: color.value,
+                    }}
+                  />
+
+                  <span>{color.name}</span>
+
+                  {isSelected && (
+                    <Check
+                      size={13}
+                      aria-hidden="true"
+                    />
+                  )}
                 </button>
               );
             })}
@@ -103,54 +71,49 @@ function ProductVariantSelector({
         </div>
       )}
 
-      {/* Color */}
-      {colors.length > 0 && (
+      {/* Size */}
+      {sizes.length > 0 && (
         <div>
-          <div>
-            <p className="text-sm font-semibold text-text">
-              Color
-            </p>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-text">
+                Select size
+              </p>
 
-            <p className="mt-1 text-xs text-text-muted">
-              {selectedColor?.name
-                ? `Selected: ${selectedColor.name}`
-                : "Select a color"}
-            </p>
+              <p className="mt-1 text-xs text-text-muted">
+                Select the size that fits you best
+              </p>
+            </div>
+
+            {onSizeGuide && (
+              <button
+                type="button"
+                onClick={onSizeGuide}
+                className="rounded-full px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/5 hover:text-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                Size guide
+              </button>
+            )}
           </div>
 
-          <div
-            className="mt-4 flex flex-wrap gap-3"
-            role="radiogroup"
-            aria-label="Product colors"
-          >
-            {colors.map((color) => {
-              const isSelected =
-                selectedColor?.name === color?.name;
+          <div className="mt-4 grid grid-cols-4 gap-2.5 sm:grid-cols-5">
+            {sizes.map((size) => {
+              const isSelected = selectedSize === size;
 
               return (
                 <button
-                  key={color.name}
+                  key={size}
                   type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  aria-label={`Select ${color.name}`}
-                  onClick={() => handleColorChange(color)}
-                  className={cn(
-                    "group flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-all duration-200",
+                  onClick={() => onSizeChange?.(size)}
+                  aria-label={`Select size ${size}`}
+                  aria-pressed={isSelected}
+                  className={`h-12 rounded-xl border text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
                     isSelected
-                      ? "border-primary bg-primary/5 text-primary"
-                      : "border-border bg-surface text-text-muted hover:border-primary/40 hover:text-primary"
-                  )}
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border-border bg-background text-text hover:border-primary hover:bg-primary/5 hover:text-primary"
+                  }`}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="h-5 w-5 rounded-full border border-black/10 shadow-sm"
-                    style={{
-                      backgroundColor: color.value,
-                    }}
-                  />
-
-                  <span>{color.name}</span>
+                  {size}
                 </button>
               );
             })}

@@ -20,100 +20,167 @@ const navItems = [
 ];
 
 function StoreHeader() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] =
+    useState(false);
 
   return (
     <>
-      <div className="border-b border-black/5 bg-primary px-4 py-2 text-center text-[11px] font-medium uppercase tracking-[0.18em] text-white sm:text-xs">
-        Free delivery on orders above Rs. 5,000
+      {/* =========================================================
+          ANNOUNCEMENT BAR
+      ========================================================= */}
+      <div className="relative overflow-hidden border-b border-white/10 bg-primary text-primary-foreground">
+        <div className="store-announcement-track flex w-max items-center whitespace-nowrap py-2.5">
+          <AnnouncementGroup />
+          <AnnouncementGroup />
+        </div>
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex h-18 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Mobile menu button */}
+      {/* =========================================================
+          MAIN HEADER
+      ========================================================= */}
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:h-[4.5rem] sm:px-6 lg:h-20 lg:px-8">
+          {/* =====================================================
+              MOBILE MENU BUTTON
+          ===================================================== */}
           <button
             type="button"
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={
+              isMobileMenuOpen
+                ? "Close menu"
+                : "Open menu"
+            }
             aria-expanded={isMobileMenuOpen}
-            onClick={() => setIsMobileMenuOpen((value) => !value)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-text transition hover:bg-black/5 lg:hidden"
+            onClick={() =>
+              setIsMobileMenuOpen((value) => !value)
+            }
+            className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 lg:hidden"
           >
             {isMobileMenuOpen ? (
-              <X size={21} strokeWidth={1.8} />
+              <X
+                size={21}
+                strokeWidth={1.8}
+                aria-hidden="true"
+                className="transition-transform duration-200 group-hover:rotate-90"
+              />
             ) : (
-              <Menu size={21} strokeWidth={1.8} />
+              <Menu
+                size={21}
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
             )}
           </button>
 
-          {/* Desktop left navigation */}
-          <nav className="hidden items-center gap-7 lg:flex">
+          {/* =====================================================
+              DESKTOP NAVIGATION
+          ===================================================== */}
+          <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
             {navItems.map((item) => (
               <NavLink
                 key={item.label}
                 to={item.to}
-                className={({ isActive }) =>
-                  [
-                    "relative py-2 text-[12px] font-medium uppercase tracking-[0.16em] transition",
-                    isActive
-                      ? "text-primary"
-                      : "text-text hover:text-primary",
-                  ].join(" ")
-                }
+                className="group relative py-3 text-[11px] font-semibold uppercase tracking-[0.17em]"
               >
-                {item.label}
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={
+                        isActive
+                          ? "text-primary"
+                          : "text-text transition-colors duration-200 group-hover:text-primary"
+                      }
+                    >
+                      {item.label}
+                    </span>
+
+                    <span
+                      aria-hidden="true"
+                      className={`absolute inset-x-0 bottom-0 mx-auto h-px bg-primary transition-transform duration-200 ${
+                        isActive
+                          ? "scale-x-100"
+                          : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                    />
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
 
-          {/* Brand */}
+          {/* =====================================================
+              BRAND
+          ===================================================== */}
           <Link
             to="/"
             aria-label="Bajwa's Collection home"
             className="absolute left-1/2 -translate-x-1/2 text-center"
           >
-            <span className="block font-heading text-[20px] font-medium tracking-[0.08em] sm:text-2xl">
-              BAJWA'S
+            <span className="block font-heading text-[19px] font-medium leading-none tracking-[0.1em] text-text sm:text-[21px] lg:text-2xl">
+              BAJWA&apos;S
             </span>
 
-            <span className="mt-[-2px] block text-[8px] font-medium uppercase tracking-[0.38em] text-text-muted sm:text-[9px]">
+            <span className="mt-1 block text-[7px] font-medium uppercase tracking-[0.4em] text-text-muted sm:text-[8px] lg:text-[9px]">
               Collection
             </span>
           </Link>
 
-          {/* Actions */}
-          <div className="ml-auto flex items-center gap-1">
+          {/* =====================================================
+              HEADER ACTIONS
+          ===================================================== */}
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
+            {/* Search */}
             <Link
               to="/search"
               aria-label="Search"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-text transition hover:bg-black/5 sm:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:inline-flex"
             >
-              <Search size={20} strokeWidth={1.8} />
+              <Search
+                size={19}
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
             </Link>
 
+            {/* Account */}
             <Link
               to="/account"
               aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-text transition hover:bg-black/5 sm:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:inline-flex"
             >
-              <UserRound size={20} strokeWidth={1.8} />
+              <UserRound
+                size={19}
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
             </Link>
 
+            {/* Wishlist */}
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-text transition hover:bg-black/5 md:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 md:inline-flex"
             >
-              <Heart size={20} strokeWidth={1.8} />
+              <Heart
+                size={19}
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
             </Link>
 
+            {/* Shopping Bag */}
             <Link
               to="/cart"
               aria-label="Shopping bag"
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-text transition hover:bg-black/5"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
-              <ShoppingBag size={20} strokeWidth={1.8} />
+              <ShoppingBag
+                size={19}
+                strokeWidth={1.8}
+                aria-hidden="true"
+              />
 
-              <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-white">
+              <span className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground">
                 0
               </span>
             </Link>
@@ -121,12 +188,82 @@ function StoreHeader() {
         </div>
       </header>
 
+      {/* =========================================================
+          MOBILE MENU
+      ========================================================= */}
       <MobileMenu
         open={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
+        onClose={() =>
+          setIsMobileMenuOpen(false)
+        }
         items={navItems}
       />
+
+      {/* =========================================================
+          ANNOUNCEMENT MARQUEE ANIMATION
+      ========================================================= */}
+      <style>{`
+        .store-announcement-track {
+          animation: store-announcement-scroll 18s linear infinite;
+          will-change: transform;
+        }
+
+        @keyframes store-announcement-scroll {
+          from {
+            transform: translate3d(0, 0, 0);
+          }
+
+          to {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+
+        .store-announcement-track:hover {
+          animation-play-state: paused;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .store-announcement-track {
+            animation: none;
+          }
+        }
+      `}</style>
     </>
+  );
+}
+
+function AnnouncementGroup() {
+  return (
+    <div className="flex shrink-0 items-center">
+      <AnnouncementMessage>
+        Free delivery on orders above Rs. 5,000
+      </AnnouncementMessage>
+
+      <AnnouncementSeparator />
+
+      <AnnouncementMessage>
+        Discover timeless Pakistani fashion by Bajwa&apos;s Collection
+      </AnnouncementMessage>
+
+      <AnnouncementSeparator />
+    </div>
+  );
+}
+
+function AnnouncementMessage({ children }) {
+  return (
+    <span className="px-6 text-[10px] font-semibold uppercase tracking-[0.18em] sm:px-10 sm:text-[11px]">
+      {children}
+    </span>
+  );
+}
+
+function AnnouncementSeparator() {
+  return (
+    <span
+      aria-hidden="true"
+      className="h-1 w-1 shrink-0 rounded-full bg-[#B08D57]"
+    />
   );
 }
 
