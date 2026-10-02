@@ -693,21 +693,26 @@ export function getNewArrivals() {
 }
 
 export function searchProducts(query) {
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = String(query ?? "").trim().toLowerCase();
 
   if (!normalizedQuery) {
-    return products;
+    return [];
   }
 
   return products.filter((product) => {
     const searchableText = [
       product.name,
+      product.slug,
       product.category,
+      product.categorySlug,
       product.collection,
+      product.collectionSlug,
+      product.sku,
       product.shortDescription,
       product.description,
-      ...product.tags,
+      ...(product.tags ?? []),
     ]
+      .filter(Boolean)
       .join(" ")
       .toLowerCase();
 
