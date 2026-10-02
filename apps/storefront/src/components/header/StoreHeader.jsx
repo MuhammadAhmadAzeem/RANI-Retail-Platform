@@ -242,7 +242,7 @@ function AnnouncementGroup() {
       <AnnouncementSeparator />
 
       <AnnouncementMessage>
-        Discover timeless Pakistani fashion by Bajwa&apos;s Collection
+        Discover timeless Pakistani fashion by Bajwa&apos;s Collections
       </AnnouncementMessage>
 
       <AnnouncementSeparator />
