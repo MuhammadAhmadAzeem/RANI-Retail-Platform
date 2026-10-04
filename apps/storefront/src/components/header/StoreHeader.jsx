@@ -1,4 +1,3 @@
-
 import {
   Heart,
   Menu,
@@ -11,7 +10,9 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import MobileMenu from "./MobileMenu";
+import MiniCart from "../ecommerce/MiniCart";
 import useWishlistStore from "../../store/wishlistStore";
+import useCartStore from "../../store/cartStore";
 
 const navItems = [
   { label: "New In", to: "/shop?filter=new" },
@@ -25,15 +26,26 @@ function StoreHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
     useState(false);
 
+  const [isMiniCartOpen, setIsMiniCartOpen] =
+    useState(false);
+
   const wishlistCount = useWishlistStore(
     (state) => state.items.length
+  );
+
+  const cartCount = useCartStore(
+    (state) =>
+      state.items.reduce(
+        (total, item) => total + item.quantity,
+        0
+      )
   );
 
   return (
     <>
       {/* =========================================================
           ANNOUNCEMENT BAR
-      ========================================================= */}
+      ========================================================= */ }
       <div className="relative overflow-hidden border-b border-white/10 bg-primary text-primary-foreground">
         <div className="store-announcement-track flex w-max items-center whitespace-nowrap py-2.5">
           <AnnouncementGroup />
@@ -43,12 +55,12 @@ function StoreHeader() {
 
       {/* =========================================================
           MAIN HEADER
-      ========================================================= */}
+      ========================================================= */ }
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:h-[4.5rem] sm:px-6 lg:h-20 lg:px-8">
           {/* =====================================================
               MOBILE MENU BUTTON
-          ===================================================== */}
+          ===================================================== */ }
           <button
             type="button"
             aria-label={
@@ -80,7 +92,7 @@ function StoreHeader() {
 
           {/* =====================================================
               DESKTOP NAVIGATION
-          ===================================================== */}
+          ===================================================== */ }
           <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
             {navItems.map((item) => (
               <NavLink
@@ -116,7 +128,7 @@ function StoreHeader() {
 
           {/* =====================================================
               BRAND
-          ===================================================== */}
+          ===================================================== */ }
           <Link
             to="/"
             aria-label="Bajwa's Collection home"
@@ -133,7 +145,7 @@ function StoreHeader() {
 
           {/* =====================================================
               HEADER ACTIONS
-          ===================================================== */}
+          ===================================================== */ }
           <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
             {/* Search */}
             <Link
@@ -190,9 +202,19 @@ function StoreHeader() {
             </Link>
 
             {/* Shopping Bag */}
-            <Link
-              to="/cart"
-              aria-label="Shopping bag"
+            <button
+              type="button"
+              onClick={() =>
+                setIsMiniCartOpen(true)
+              }
+              aria-label={
+                cartCount > 0
+                  ? `Shopping bag, ${cartCount} ${
+                      cartCount === 1 ? "item" : "items"
+                    }`
+                  : "Shopping bag"
+              }
+              aria-expanded={isMiniCartOpen}
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <ShoppingBag
@@ -201,17 +223,20 @@ function StoreHeader() {
                 aria-hidden="true"
               />
 
-              <span className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground">
-                0
+              <span
+                aria-hidden="true"
+                className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground"
+              >
+                {cartCount > 99 ? "99+" : cartCount}
               </span>
-            </Link>
+            </button>
           </div>
         </div>
       </header>
 
       {/* =========================================================
           MOBILE MENU
-      ========================================================= */}
+      ========================================================= */ }
       <MobileMenu
         open={isMobileMenuOpen}
         onClose={() =>
@@ -221,8 +246,18 @@ function StoreHeader() {
       />
 
       {/* =========================================================
+          MINI CART
+      ========================================================= */ }
+      <MiniCart
+        open={isMiniCartOpen}
+        onClose={() =>
+          setIsMiniCartOpen(false)
+        }
+      />
+
+      {/* =========================================================
           ANNOUNCEMENT MARQUEE ANIMATION
-      ========================================================= */}
+      ========================================================= */ }
       <style>{`
         .store-announcement-track {
           animation: store-announcement-scroll 18s linear infinite;

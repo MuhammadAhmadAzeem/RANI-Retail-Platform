@@ -18,6 +18,7 @@ import SizeGuide from "../components/ecommerce/SizeGuide";
 import StickyAddToCart from "../components/ecommerce/StickyAddToCart";
 import useProducts from "../hooks/useProducts";
 import useWishlistStore from "../store/wishlistStore";
+import useCartStore from "../store/cartStore";
 
 function ProductDetails() {
   const { slug } = useParams();
@@ -36,6 +37,9 @@ function ProductDetails() {
   );
   const toggleWishlist = useWishlistStore(
     (state) => state.toggleWishlist
+  );
+  const addToCart = useCartStore(
+    (state) => state.addToCart
   );
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
@@ -114,13 +118,12 @@ function ProductDetails() {
       return;
     }
 
-    // Cart integration will be connected in the cart milestone.
-    console.log("Add to bag", {
-      productId: product.id,
+    addToCart(
+      product,
       quantity,
-      size: selectedSize,
-      color: selectedColor,
-    });
+      selectedSize,
+      selectedColor
+    );
   };
 
   const handleWishlistToggle = () => {
@@ -331,84 +334,85 @@ function ProductDetails() {
           </div>
         </section>
 
-       {/* =========================================================
-    PRODUCT CARE
-========================================================= */}
-{Array.isArray(product.care) && product.care.length > 0 && (
-  <section className="border-y border-primary/10 bg-linear-to-br from-primary/[0.10] to-[#F7F3EC]">
-    <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-20 xl:py-24">
-      {/* Care Header */}
-      <div className="max-w-2xl">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-surface/80 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
-          <span
-            aria-hidden="true"
-            className="h-1.5 w-1.5 rounded-full bg-[#B08D57]"
-          />
-
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-            Product care
-          </span>
-        </div>
-
-        <h2 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-tight text-text sm:text-4xl">
-          Care instructions
-        </h2>
-
-        <p className="mt-3 max-w-xl text-sm leading-7 text-text-muted">
-          Simple care practices to help preserve the fabric, finish, and
-          overall quality of your piece.
-        </p>
-      </div>
-
-      {/* Care Grid */}
-      <div className="mt-8 grid gap-4 sm:mt-9 sm:grid-cols-2 lg:mt-10 lg:grid-cols-3">
-        {product.care.map((item, index) => (
-          <div
-            key={item}
-            className="group relative overflow-hidden rounded-2xl border border-primary/10 bg-surface/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md sm:p-6"
-          >
-            {/* Burgundy Decorative Shape */}
-            <div
-              aria-hidden="true"
-              className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-primary/[0.06] transition-transform duration-300 group-hover:scale-110"
-            />
-
-            {/* Gold Decorative Shape */}
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-[#B08D57]/[0.05]"
-            />
-
-            <div className="relative">
-              {/* Number + Icon */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-primary">
-                  <Check
-                    size={17}
-                    strokeWidth={2.25}
+        {/* =========================================================
+            PRODUCT CARE
+        ========================================================= */}
+        {Array.isArray(product.care) && product.care.length > 0 && (
+          <section className="border-y border-primary/10 bg-linear-to-br from-primary/[0.10] to-[#F7F3EC]">
+            <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-20 xl:py-24">
+              {/* Care Header */}
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-surface/80 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
+                  <span
                     aria-hidden="true"
+                    className="h-1.5 w-1.5 rounded-full bg-[#B08D57]"
                   />
+
+                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    Product care
+                  </span>
                 </div>
 
-                <span className="rounded-full bg-primary/[0.04] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                <h2 className="mt-4 font-serif text-3xl font-medium leading-tight tracking-tight text-text sm:text-4xl">
+                  Care instructions
+                </h2>
+
+                <p className="mt-3 max-w-xl text-sm leading-7 text-text-muted">
+                  Simple care practices to help preserve the fabric, finish, and
+                  overall quality of your piece.
+                </p>
               </div>
 
-              {/* Care Text */}
-              <p className="mt-5 text-sm leading-7 text-text sm:text-[15px]">
-                {item}
-              </p>
+              {/* Care Grid */}
+              <div className="mt-8 grid gap-4 sm:mt-9 sm:grid-cols-2 lg:mt-10 lg:grid-cols-3">
+                {product.care.map((item, index) => (
+                  <div
+                    key={item}
+                    className="group relative overflow-hidden rounded-2xl border border-primary/10 bg-surface/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md sm:p-6"
+                  >
+                    {/* Burgundy Decorative Shape */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-primary/[0.06] transition-transform duration-300 group-hover:scale-110"
+                    />
 
-              {/* Gold Accent */}
-              <div className="mt-5 h-px w-10 bg-[#B08D57] transition-all duration-300 group-hover:w-16" />
+                    {/* Gold Decorative Shape */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-[#B08D57]/[0.05]"
+                    />
+
+                    <div className="relative">
+                      {/* Number + Icon */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-primary">
+                          <Check
+                            size={17}
+                            strokeWidth={2.25}
+                            aria-hidden="true"
+                          />
+                        </div>
+
+                        <span className="rounded-full bg-primary/[0.04] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      </div>
+
+                      {/* Care Text */}
+                      <p className="mt-5 text-sm leading-7 text-text sm:text-[15px]">
+                        {item}
+                      </p>
+
+                      {/* Gold Accent */}
+                      <div className="mt-5 h-px w-10 bg-[#B08D57] transition-all duration-300 group-hover:w-16" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
+          </section>
+        )}
+
         {/* =========================================================
             RELATED PRODUCTS
         ========================================================= */}

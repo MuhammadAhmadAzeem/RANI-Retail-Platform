@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import StoreLayout from "../layouts/StoreLayout";
 
@@ -52,6 +51,13 @@ export const router = createBrowserRouter([
         path: "wishlist",
         lazy: async () => ({
           Component: (await import("../pages/Wishlist")).default,
+        }),
+      },
+
+      {
+        path: "cart",
+        lazy: async () => ({
+          Component: (await import("../pages/Cart")).default,
         }),
       },
 
