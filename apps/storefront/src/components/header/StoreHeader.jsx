@@ -1,3 +1,4 @@
+
 import {
   Heart,
   Menu,
@@ -10,6 +11,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import MobileMenu from "./MobileMenu";
+import useWishlistStore from "../../store/wishlistStore";
 
 const navItems = [
   { label: "New In", to: "/shop?filter=new" },
@@ -22,6 +24,10 @@ const navItems = [
 function StoreHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
     useState(false);
+
+  const wishlistCount = useWishlistStore(
+    (state) => state.items.length
+  );
 
   return (
     <>
@@ -158,14 +164,29 @@ function StoreHeader() {
             {/* Wishlist */}
             <Link
               to="/wishlist"
-              aria-label="Wishlist"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 md:inline-flex"
+              aria-label={
+                wishlistCount > 0
+                  ? `Wishlist, ${wishlistCount} ${
+                      wishlistCount === 1 ? "item" : "items"
+                    }`
+                  : "Wishlist"
+              }
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 md:inline-flex"
             >
               <Heart
                 size={19}
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
+
+              {wishlistCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground"
+                >
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
             </Link>
 
             {/* Shopping Bag */}

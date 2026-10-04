@@ -1,4 +1,6 @@
+
 import ProductCard from "./ProductCard";
+import useWishlistStore from "../../store/wishlistStore";
 
 function ProductGrid({
   products = [],
@@ -9,6 +11,22 @@ function ProductGrid({
   showQuickAdd = false,
   className = "",
 }) {
+  const storedWishlistItems = useWishlistStore(
+    (state) => state.items
+  );
+
+  const toggleWishlist = useWishlistStore(
+    (state) => state.toggleWishlist
+  );
+
+  const effectiveWishlistItems =
+    wishlistItems.length > 0
+      ? wishlistItems
+      : storedWishlistItems.map((item) => item.id);
+
+  const handleWishlistToggle =
+    onWishlistToggle ?? toggleWishlist;
+
   if (loading) {
     return (
       <div
@@ -45,7 +63,7 @@ function ProductGrid({
       className={`grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:grid-cols-3 xl:grid-cols-4 ${className}`}
     >
       {products.map((product) => {
-        const isWishlisted = wishlistItems.includes(
+        const isWishlisted = effectiveWishlistItems.includes(
           product.id
         );
 
@@ -54,7 +72,7 @@ function ProductGrid({
             key={product.id}
             product={product}
             isWishlisted={isWishlisted}
-            onWishlistToggle={onWishlistToggle}
+            onWishlistToggle={handleWishlistToggle}
             showQuickAdd={showQuickAdd}
           />
         );

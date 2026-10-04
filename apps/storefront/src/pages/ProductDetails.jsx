@@ -17,6 +17,7 @@ import ProductVariantSelector from "../components/ecommerce/ProductVariantSelect
 import SizeGuide from "../components/ecommerce/SizeGuide";
 import StickyAddToCart from "../components/ecommerce/StickyAddToCart";
 import useProducts from "../hooks/useProducts";
+import useWishlistStore from "../store/wishlistStore";
 
 function ProductDetails() {
   const { slug } = useParams();
@@ -30,7 +31,12 @@ function ProductDetails() {
     product?.colors?.[0]?.name || ""
   );
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const isWishlisted = useWishlistStore((state) =>
+    state.items.some((item) => item.id === product?.id)
+  );
+  const toggleWishlist = useWishlistStore(
+    (state) => state.toggleWishlist
+  );
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const relatedProducts = useMemo(() => {
@@ -118,7 +124,11 @@ function ProductDetails() {
   };
 
   const handleWishlistToggle = () => {
-    setIsWishlisted((current) => !current);
+    if (!product) {
+      return;
+    }
+
+    toggleWishlist(product);
   };
 
   const handleSizeGuide = () => {
