@@ -47,6 +47,39 @@ export const router = createBrowserRouter([
         }),
       },
 
+      // =========================================================
+      // CUSTOMER ACCOUNT & AUTHENTICATION
+      // =========================================================
+      {
+        path: "account",
+        lazy: async () => ({
+          Component: (await import("../pages/account/Account")).default,
+        }),
+      },
+
+      {
+        path: "account/login",
+        lazy: async () => ({
+          Component: (await import("../pages/account/Login")).default,
+        }),
+      },
+
+      {
+        path: "account/register",
+        lazy: async () => ({
+          Component: (await import("../pages/account/Register")).default,
+        }),
+      },
+
+      {
+        path: "account/forgot-password",
+        lazy: async () => ({
+          Component: (
+            await import("../pages/account/ForgotPassword")
+          ).default,
+        }),
+      },
+
       {
         path: "wishlist",
         lazy: async () => ({
