@@ -48,15 +48,8 @@ export const router = createBrowserRouter([
       },
 
       // =========================================================
-      // CUSTOMER ACCOUNT & AUTHENTICATION
+      // CUSTOMER AUTHENTICATION
       // =========================================================
-      {
-        path: "account",
-        lazy: async () => ({
-          Component: (await import("../pages/account/Account")).default,
-        }),
-      },
-
       {
         path: "account/login",
         lazy: async () => ({
@@ -78,6 +71,70 @@ export const router = createBrowserRouter([
             await import("../pages/account/ForgotPassword")
           ).default,
         }),
+      },
+
+      // =========================================================
+      // CUSTOMER ACCOUNT
+      // =========================================================
+      {
+        path: "account",
+        lazy: async () => ({
+          Component: (await import("../layouts/AccountLayout")).default,
+        }),
+        children: [
+          {
+            index: true,
+            lazy: async () => ({
+              Component: (await import("../pages/account/Account")).default,
+            }),
+          },
+
+          {
+            path: "profile",
+            lazy: async () => ({
+              Component: (await import("../pages/account/Profile")).default,
+            }),
+          },
+
+          {
+            path: "orders",
+            lazy: async () => ({
+              Component: (await import("../pages/account/Orders")).default,
+            }),
+          },
+
+          {
+            path: "orders/:orderId",
+            lazy: async () => ({
+              Component: (
+                await import("../pages/account/OrderDetails")
+              ).default,
+            }),
+          },
+
+          {
+            path: "addresses",
+            lazy: async () => ({
+              Component: (
+                await import("../pages/account/Addresses")
+              ).default,
+            }),
+          },
+
+          {
+            path: "wishlist",
+            lazy: async () => ({
+              Component: (await import("../pages/account/Wishlist")).default,
+            }),
+          },
+
+          {
+            path: "returns",
+            lazy: async () => ({
+              Component: (await import("../pages/account/Returns")).default,
+            }),
+          },
+        ],
       },
 
       {
