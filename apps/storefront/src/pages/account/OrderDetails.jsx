@@ -1,56 +1,119 @@
-import { ArrowLeft, PackageSearch } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  PackageSearch,
+  ShoppingBag,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 function OrderDetails() {
   return (
-    <main className="min-h-[70vh] bg-background">
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+    <section className="min-w-0">
+      {/* Header */}
+      <div className="border-b border-border pb-7">
         <Link
           to="/account/orders"
-          className="inline-flex items-center gap-2 text-sm font-medium text-text-muted transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="inline-flex min-h-9 items-center gap-2 text-xs font-semibold text-text-muted transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
-          <ArrowLeft size={16} aria-hidden="true" />
-          Back to Orders
+          <ArrowLeft size={15} aria-hidden="true" />
+          Back to orders
         </Link>
 
-        <div className="mt-7">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">
-            Account
+        <div className="mt-6">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+            Order information
           </p>
 
-          <h1 className="mt-3 font-heading text-3xl font-medium text-text sm:text-4xl">
-            Order Details
+          <h1 className="mt-2 font-heading text-3xl font-medium tracking-tight text-text sm:text-4xl">
+            Order details
           </h1>
 
           <p className="mt-3 max-w-xl text-sm leading-6 text-text-muted">
-            Review the items, status, payment, and delivery
-            information for your order.
+            Your order items, payment information, and delivery
+            updates will appear here.
           </p>
         </div>
+      </div>
 
-        <div className="mt-8 rounded-2xl border border-border bg-surface p-6 text-center shadow-sm sm:p-10">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-muted text-primary">
-            <PackageSearch size={28} strokeWidth={1.8} aria-hidden="true" />
+      {/* Empty State */}
+      <div className="py-14 sm:py-20">
+        <div className="mx-auto max-w-xl text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/10 bg-primary/[0.045] text-primary">
+            <PackageSearch
+              size={32}
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
           </div>
 
-          <h2 className="mt-6 font-heading text-2xl font-medium text-text">
-            Order details unavailable
-          </h2>
-
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-muted">
-            Order information will appear here when your order
-            data is available.
+          <p className="mt-7 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+            No order selected
           </p>
 
-          <Link
-            to="/account/orders"
-            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-primary/30 hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            View Orders
-          </Link>
+          <h2 className="mt-3 font-heading text-2xl font-medium tracking-tight text-text sm:text-3xl">
+            Order details will appear here.
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-text-muted">
+            Select an order from your order history to view its
+            items, status, payment, and delivery information.
+          </p>
+
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              to="/account/orders"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-auto"
+            >
+              View Orders
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+
+            <Link
+              to="/shop"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-primary/25 hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-auto"
+            >
+              <ShoppingBag size={15} aria-hidden="true" />
+              Continue Shopping
+            </Link>
+          </div>
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* Future Order Sections */}
+      <div className="border-t border-border pt-7">
+        <div className="grid gap-6 sm:grid-cols-3">
+          <div>
+            <p className="text-sm font-semibold text-text">
+              Items
+            </p>
+
+            <p className="mt-1.5 text-xs leading-5 text-text-muted">
+              Ordered products and quantities.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-text">
+              Delivery
+            </p>
+
+            <p className="mt-1.5 text-xs leading-5 text-text-muted">
+              Shipping status and delivery updates.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-text">
+              Payment
+            </p>
+
+            <p className="mt-1.5 text-xs leading-5 text-text-muted">
+              Payment and order summary information.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
