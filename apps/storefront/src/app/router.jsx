@@ -137,6 +137,9 @@ export const router = createBrowserRouter([
         ],
       },
 
+      // =========================================================
+      // CUSTOMER SHOPPING
+      // =========================================================
       {
         path: "wishlist",
         lazy: async () => ({
@@ -151,6 +154,39 @@ export const router = createBrowserRouter([
         }),
       },
 
+      // =========================================================
+      // CHECKOUT
+      // =========================================================
+      {
+        path: "checkout",
+        lazy: async () => ({
+          Component: (
+            await import("../pages/checkout/Checkout")
+          ).default,
+        }),
+      },
+
+      {
+        path: "checkout/payment",
+        lazy: async () => ({
+          Component: (
+            await import("../pages/checkout/Payment")
+          ).default,
+        }),
+      },
+
+      {
+        path: "checkout/success",
+        lazy: async () => ({
+          Component: (
+            await import("../pages/checkout/OrderSuccess")
+          ).default,
+        }),
+      },
+
+      // =========================================================
+      // FALLBACK
+      // =========================================================
       {
         path: "*",
         lazy: async () => ({
