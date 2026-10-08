@@ -10,6 +10,7 @@ function AddToBag({
   isSoldOut = false,
   requiresSize = false,
   selectedSize = "",
+  buttonRef,
   onDecrease,
   onIncrease,
   onAddToBag,
@@ -38,9 +39,7 @@ function AddToBag({
           <button
             type="button"
             onClick={onDecrease}
-            disabled={
-              isSoldOut || quantity <= 1
-            }
+            disabled={isSoldOut || quantity <= 1}
             aria-label="Decrease quantity"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-text transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
@@ -60,10 +59,7 @@ function AddToBag({
           <button
             type="button"
             onClick={onIncrease}
-            disabled={
-              isSoldOut ||
-              quantity >= stock
-            }
+            disabled={isSoldOut || quantity >= stock}
             aria-label="Increase quantity"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-text transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
@@ -76,6 +72,7 @@ function AddToBag({
 
         {/* Add To Bag */}
         <button
+          ref={buttonRef}
           type="button"
           onClick={onAddToBag}
           disabled={isSoldOut}

@@ -5,8 +5,18 @@ const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
+      isCartDrawerOpen: false,
 
-      addToCart: (product, quantity = 1, selectedSize = "", selectedColor = "") => {
+      openCartDrawer: () => set({ isCartDrawerOpen: true }),
+
+      closeCartDrawer: () => set({ isCartDrawerOpen: false }),
+
+      addToCart: (
+        product,
+        quantity = 1,
+        selectedSize = "",
+        selectedColor = ""
+      ) => {
         if (!product?.id) {
           return;
         }
@@ -48,6 +58,7 @@ const useCartStore = create(
                   stock,
                 },
               ],
+              isCartDrawerOpen: true,
             };
           }
 
@@ -65,11 +76,16 @@ const useCartStore = create(
 
           return {
             items: updatedItems,
+            isCartDrawerOpen: true,
           };
         });
       },
 
-      removeFromCart: (productId, selectedSize = "", selectedColor = "") => {
+      removeFromCart: (
+        productId,
+        selectedSize = "",
+        selectedColor = ""
+      ) => {
         set((state) => ({
           items: state.items.filter(
             (item) =>
@@ -130,9 +146,7 @@ const useCartStore = create(
         }));
       },
 
-      clearCart: () => {
-        set({ items: [] });
-      },
+      clearCart: () => set({ items: [] }),
 
       getItemQuantity: (
         productId,
@@ -149,20 +163,18 @@ const useCartStore = create(
         return item?.quantity || 0;
       },
 
-      getTotalItems: () => {
-        return get().items.reduce(
+      getTotalItems: () =>
+        get().items.reduce(
           (total, item) => total + item.quantity,
           0
-        );
-      },
+        ),
 
-      getSubtotal: () => {
-        return get().items.reduce(
+      getSubtotal: () =>
+        get().items.reduce(
           (subtotal, item) =>
             subtotal + item.price * item.quantity,
           0
-        );
-      },
+        ),
     }),
     {
       name: "rani-storefront-cart",
@@ -175,4 +187,3 @@ const useCartStore = create(
 );
 
 export default useCartStore;
-

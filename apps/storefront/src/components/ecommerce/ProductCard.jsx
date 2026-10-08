@@ -4,9 +4,11 @@ import {
 } from "lucide-react";
 import {
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import Price from "../common/Price";
+import useCartStore from "../../store/cartStore";
 
 function getProductImage(product) {
   if (Array.isArray(product.images)) {
@@ -67,6 +69,16 @@ function ProductCard({
   onWishlistToggle,
   showQuickAdd = false,
 }) {
+  const navigate = useNavigate();
+
+  const addToCart = useCartStore(
+    (state) => state.addToCart
+  );
+
+  const openCartDrawer = useCartStore(
+    (state) => state.openCartDrawer
+  );
+
   const image = getProductImage(product);
   const category = getProductCategory(product);
   const stockState = getStockState(product);
@@ -83,11 +95,42 @@ function ProductCard({
   const isSoldOut = stockState === "sold-out";
   const isLowStock = stockState === "low-stock";
 
+  const hasSizes =
+    Array.isArray(product.sizes) &&
+    product.sizes.length > 0;
+
+  const hasColors =
+    Array.isArray(product.colors) &&
+    product.colors.length > 0;
+
+  const requiresOptions = hasSizes || hasColors;
+
   const handleWishlistClick = (event) => {
     event.preventDefault();
     event.stopPropagation();
 
     onWishlistToggle?.(product);
+  };
+
+  const handleQuickAdd = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isSoldOut) {
+      return;
+    }
+
+    // Products with variants need selection on the product page.
+    if (requiresOptions) {
+      navigate(`/product/${product.slug}`);
+      return;
+    }
+
+    // Add products without variants directly to the cart.
+    addToCart(product, 1);
+
+    // Open the shared drawer when its store action is available.
+    openCartDrawer?.();
   };
 
   return (
@@ -175,14 +218,11 @@ function ProductCard({
           <div className="pointer-events-none absolute inset-x-3 bottom-3 opacity-0 transition duration-300 group-hover:pointer-events-auto group-hover:opacity-100 max-sm:hidden">
             <button
               type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
+              onClick={handleQuickAdd}
               className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-surface/95 px-4 text-xs font-bold uppercase tracking-[0.08em] text-text shadow-lg backdrop-blur-md transition hover:bg-primary hover:text-primary-foreground"
             >
               <Plus size={15} />
-              Quick Add
+              {requiresOptions ? "Choose options" : "Quick Add"}
             </button>
           </div>
         )}

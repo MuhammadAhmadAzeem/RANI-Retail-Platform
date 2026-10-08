@@ -6,7 +6,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import Breadcrumbs from "../components/common/Breadcrumbs";
 import Price from "../components/common/Price";
@@ -32,16 +32,58 @@ function ProductDetails() {
     product?.colors?.[0]?.name || ""
   );
   const [quantity, setQuantity] = useState(1);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+
+  // Track the main Add to Bag area and the variant selector.
+  const [isMainAddToBagVisible, setIsMainAddToBagVisible] =
+    useState(true);
+
+  const mainAddToBagContainerRef = useRef(null);
+  const variantSelectorRef = useRef(null);
+
   const isWishlisted = useWishlistStore((state) =>
     state.items.some((item) => item.id === product?.id)
   );
+
   const toggleWishlist = useWishlistStore(
     (state) => state.toggleWishlist
   );
+
   const addToCart = useCartStore(
     (state) => state.addToCart
   );
-  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+
+  // Show the sticky CTA only after the main CTA has passed above
+  // the viewport. Keep it hidden while the main CTA is visible
+  // or is still further down the page.
+  useEffect(() => {
+    const target = mainAddToBagContainerRef.current;
+
+    if (
+      !target ||
+      typeof IntersectionObserver === "undefined"
+    ) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const hasPassedAboveViewport =
+          entry.boundingClientRect.bottom < 0;
+
+        setIsMainAddToBagVisible(
+          entry.isIntersecting || !hasPassedAboveViewport
+        );
+      },
+      {
+        threshold: 0,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [product?.id]);
 
   const relatedProducts = useMemo(() => {
     if (!product) {
@@ -114,7 +156,16 @@ function ProductDetails() {
   };
 
   const handleAddToBag = () => {
+    if (isSoldOut) {
+      return;
+    }
+
     if (sizes.length > 0 && !selectedSize) {
+      variantSelectorRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
       return;
     }
 
@@ -141,8 +192,9 @@ function ProductDetails() {
   return (
     <>
       <main
-        className={`min-h-screen bg-background ${!isSoldOut ? "pb-24 lg:pb-0" : ""
-          }`}
+        className={`min-h-screen bg-background ${
+          !isSoldOut ? "pb-24 lg:pb-0" : ""
+        }`}
       >
         {/* =========================================================
             PRODUCT HERO
@@ -217,10 +269,11 @@ function ProductDetails() {
                         : "Add to wishlist"
                     }
                     aria-pressed={isWishlisted}
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-200 sm:h-11 sm:w-11 ${isWishlisted
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-200 sm:h-11 sm:w-11 ${
+                      isWishlisted
                         ? "border-primary bg-primary text-primary-foreground shadow-sm"
                         : "border-border bg-background text-text hover:border-primary hover:text-primary"
-                      }`}
+                    }`}
                   >
                     <Heart
                       size={18}
@@ -261,7 +314,10 @@ function ProductDetails() {
                 {/* =================================================
                     VARIANT SELECTOR
                 ================================================= */}
-                <div className="mt-6 sm:mt-7">
+                <div
+                  ref={variantSelectorRef}
+                  className="mt-6 sm:mt-7"
+                >
                   <ProductVariantSelector
                     sizes={sizes}
                     colors={colors}
@@ -276,16 +332,18 @@ function ProductDetails() {
                 {/* =================================================
                     MAIN ADD TO BAG
                 ================================================= */}
-                <AddToBag
-                  quantity={quantity}
-                  stock={stock}
-                  isSoldOut={isSoldOut}
-                  requiresSize={sizes.length > 0}
-                  selectedSize={selectedSize}
-                  onDecrease={decreaseQuantity}
-                  onIncrease={increaseQuantity}
-                  onAddToBag={handleAddToBag}
-                />
+                <div ref={mainAddToBagContainerRef}>
+                  <AddToBag
+                    quantity={quantity}
+                    stock={stock}
+                    isSoldOut={isSoldOut}
+                    requiresSize={sizes.length > 0}
+                    selectedSize={selectedSize}
+                    onDecrease={decreaseQuantity}
+                    onIncrease={increaseQuantity}
+                    onAddToBag={handleAddToBag}
+                  />
+                </div>
 
                 {/* =================================================
                     PRODUCT DETAILS
@@ -456,17 +514,20 @@ function ProductDetails() {
 
       {/* ===========================================================
           MOBILE STICKY ADD TO CART
-          Same size-selection logic as main AddToBag
+          Show only after the main Add to Bag area is scrolled above
+          the viewport. Keep the same selected size and quantity.
       =========================================================== */}
-      <StickyAddToCart
-        productName={product.name}
-        price={product.price}
-        compareAtPrice={product.compareAtPrice}
-        isSoldOut={isSoldOut}
-        requiresSize={sizes.length > 0}
-        selectedSize={selectedSize}
-        onAddToBag={handleAddToBag}
-      />
+      {!isMainAddToBagVisible && (
+        <StickyAddToCart
+          productName={product.name}
+          price={product.price}
+          compareAtPrice={product.compareAtPrice}
+          isSoldOut={isSoldOut}
+          requiresSize={sizes.length > 0}
+          selectedSize={selectedSize}
+          onAddToBag={handleAddToBag}
+        />
+      )}
 
       {/* ===========================================================
           SIZE GUIDE

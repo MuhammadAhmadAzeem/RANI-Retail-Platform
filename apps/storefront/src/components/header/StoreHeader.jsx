@@ -11,7 +11,6 @@ import { Link, NavLink } from "react-router-dom";
 
 import MobileMenu from "./MobileMenu";
 import CartDrawer from "../ecommerce/CartDrawer";
-import MiniCart from "../ecommerce/MiniCart";
 import useWishlistStore from "../../store/wishlistStore";
 import useCartStore from "../../store/cartStore";
 
@@ -27,11 +26,18 @@ function StoreHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
     useState(false);
 
-  const [isMiniCartOpen, setIsMiniCartOpen] =
-    useState(false);
+  // Cart drawer state is shared through Zustand.
+  const isCartDrawerOpen = useCartStore(
+    (state) => state.isCartDrawerOpen
+  );
 
-  const [isCartDrawerOpen, setIsCartDrawerOpen] =
-    useState(false);
+  const openCartDrawer = useCartStore(
+    (state) => state.openCartDrawer
+  );
+
+  const closeCartDrawer = useCartStore(
+    (state) => state.closeCartDrawer
+  );
 
   const wishlistCount = useWishlistStore(
     (state) => state.items.length
@@ -210,9 +216,7 @@ function StoreHeader() {
             {/* Shopping Bag */}
             <button
               type="button"
-              onClick={() =>
-                setIsCartDrawerOpen(true)
-              }
+              onClick={openCartDrawer}
               aria-label={
                 cartCount > 0
                   ? `Shopping bag, ${cartCount} ${
@@ -223,6 +227,7 @@ function StoreHeader() {
                   : "Shopping bag"
               }
               aria-expanded={isCartDrawerOpen}
+              aria-haspopup="dialog"
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <ShoppingBag
@@ -254,23 +259,12 @@ function StoreHeader() {
       />
 
       {/* =========================================================
-          MINI CART
-      ========================================================= */}
-      <MiniCart
-        open={isMiniCartOpen}
-        onClose={() =>
-          setIsMiniCartOpen(false)
-        }
-      />
-
-      {/* =========================================================
           CART DRAWER
+          Shared with product-page Add to Bag actions.
       ========================================================= */}
       <CartDrawer
         open={isCartDrawerOpen}
-        onClose={() =>
-          setIsCartDrawerOpen(false)
-        }
+        onClose={closeCartDrawer}
       />
 
       {/* =========================================================
