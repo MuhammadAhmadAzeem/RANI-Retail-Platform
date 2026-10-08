@@ -4,9 +4,13 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { motion } from "motion/react";
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
 import {
   useSearchParams,
@@ -73,14 +77,283 @@ function getCollectionLabel(collection) {
   return collection.name || collection.title || collection.label;
 }
 
+function DropdownSelect({
+  label,
+  value,
+  options,
+  onChange,
+  placeholder,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const selectedOption = options.find(
+    (option) => option.value === value
+  );
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick
+    );
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, []);
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="relative min-w-0"
+    >
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() =>
+          setIsOpen((current) => !current)
+        }
+        className="flex h-11 w-full items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 text-left transition-colors hover:border-primary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/10"
+      >
+        <span className="min-w-0">
+          <span className="block text-[9px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+            {label}
+          </span>
+
+          <span className="mt-0.5 block truncate text-xs font-medium text-text">
+            {selectedOption?.label || placeholder}
+          </span>
+        </span>
+
+        <ChevronDown
+          size={15}
+          aria-hidden="true"
+          className={`shrink-0 text-text-muted transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-[calc(100%+7px)] z-40 w-full min-w-[210px] overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-xl">
+          {options.map((option) => {
+            const isSelected =
+              option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-xs transition-colors ${
+                  isSelected
+                    ? "bg-primary/5 font-semibold text-primary"
+                    : "text-text hover:bg-surface-muted hover:text-primary"
+                }`}
+              >
+                <span>{option.label}</span>
+
+                {isSelected && (
+                  <Check
+                    size={13}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortDropdown({
+  value,
+  onChange,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const selectedOption =
+    sortOptions.find(
+      (option) => option.value === value
+    ) || sortOptions[0];
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick
+    );
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, []);
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="relative"
+    >
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() =>
+          setIsOpen((current) => !current)
+        }
+        className="inline-flex h-10 min-w-[154px] items-center justify-between gap-3 rounded-full border border-border bg-surface px-4 text-xs font-medium text-text transition-colors hover:border-primary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/10"
+      >
+        <span className="text-text-muted">
+          Sort by
+        </span>
+
+        <span className="font-semibold">
+          {selectedOption.label}
+        </span>
+
+        <ChevronDown
+          size={13}
+          aria-hidden="true"
+          className={`shrink-0 text-text-muted transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-[calc(100%+7px)] z-40 min-w-[210px] overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-xl">
+          {sortOptions.map((option) => {
+            const isSelected =
+              option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-xs transition-colors ${
+                  isSelected
+                    ? "bg-primary/5 font-semibold text-primary"
+                    : "text-text hover:bg-surface-muted hover:text-primary"
+                }`}
+              >
+                <span>{option.label}</span>
+
+                {isSelected && (
+                  <Check
+                    size={13}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FilterTag({
+  label,
+  onRemove,
+}) {
+  return (
+    <span className="inline-flex h-8 items-center gap-2 rounded-full border border-border bg-surface px-3 text-[10px] font-medium text-text">
+      <span className="max-w-40 truncate">
+        {label}
+      </span>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
+        className="text-text-muted transition-colors hover:text-danger"
+      >
+        <X size={13} />
+      </button>
+    </span>
+  );
+}
+
 function Shop() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] =
+    useSearchParams();
 
   const query = searchParams.get("q") || "";
-  const category = searchParams.get("category") || "";
-  const collection = searchParams.get("collection") || "";
-  const price = searchParams.get("price") || "all";
-  const sort = searchParams.get("sort") || "featured";
+  const category =
+    searchParams.get("category") || "";
+  const collection =
+    searchParams.get("collection") || "";
+  const price =
+    searchParams.get("price") || "all";
+  const sort =
+    searchParams.get("sort") || "featured";
 
   const {
     products,
@@ -111,9 +384,8 @@ function Shop() {
 
   const updateParams = useCallback(
     (updates, options = {}) => {
-      const nextParams = new URLSearchParams(
-        searchParams
-      );
+      const nextParams =
+        new URLSearchParams(searchParams);
 
       Object.entries(updates).forEach(
         ([key, value]) => {
@@ -121,7 +393,8 @@ function Shop() {
             value === undefined ||
             value === null ||
             value === "" ||
-            value === "all"
+            value === "all" ||
+            value === "featured"
           ) {
             nextParams.delete(key);
           } else {
@@ -160,16 +433,15 @@ function Shop() {
     sort !== "featured";
 
   const activeFilterCount =
-    Number(Boolean(query)) +
     Number(Boolean(category)) +
     Number(Boolean(collection)) +
     Number(price !== "all") +
-    Number(sort !== "featured");
+    Number(Boolean(query));
 
   return (
     <main className="min-h-screen bg-background">
       <section className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="mx-auto max-w-[1440px] px-5 py-7 sm:px-8 sm:py-9 lg:py-11">
           <Breadcrumbs
             items={[
               {
@@ -179,14 +451,30 @@ function Shop() {
             ]}
           />
 
-          <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 8,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.45,
+              ease: "easeOut",
+            }}
+            className="mt-7 max-w-3xl"
+          >
+            <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-primary sm:text-[10px]">
               Bajwa&apos;s Collection
             </p>
 
-            <h1 className="mt-3 font-serif text-4xl font-medium tracking-tight text-text sm:text-5xl">
+            <h1 className="mt-3 font-heading text-3xl font-medium tracking-[-0.035em] text-text sm:text-4xl lg:text-5xl">
               {selectedCategory
-                ? getCategoryLabel(selectedCategory)
+                ? getCategoryLabel(
+                    selectedCategory
+                  )
                 : selectedCollection
                   ? getCollectionLabel(
                       selectedCollection
@@ -194,18 +482,18 @@ function Shop() {
                   : "Shop"}
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted sm:text-base">
-              Explore curated Pakistani fashion pieces
-              crafted for everyday elegance and timeless
-              style
+            <p className="mt-3 max-w-xl text-sm leading-6 text-text-muted">
+              Discover contemporary Pakistani
+              fashion designed for everyday
+              elegance and special occasions.
             </p>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-[1440px] px-5 py-6 sm:px-8 sm:py-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="w-full lg:max-w-md">
+          <div className="w-full lg:max-w-xl">
             <SearchBar
               defaultValue={query}
               placeholder="Search products by name"
@@ -213,107 +501,100 @@ function Shop() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <label
-              htmlFor="sort-products"
-              className="hidden text-sm font-medium text-text-muted sm:block"
-            >
-              Sort by
-            </label>
-
-            <div className="relative w-full sm:w-auto">
-              <select
-                id="sort-products"
-                value={sort}
-                onChange={(event) =>
-                  updateParams({
-                    sort: event.target.value,
-                  })
-                }
-                className="h-11 w-full appearance-none rounded-full border border-border bg-surface px-4 pr-10 text-sm font-medium text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 sm:w-52"
-              >
-                {sortOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-
-              <ChevronDown
-                size={17}
-                aria-hidden="true"
-                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <button
-            type="button"
-            onClick={() =>
+          <SortDropdown
+            value={sort}
+            onChange={(value) =>
               updateParams({
-                category: "",
+                sort: value,
               })
             }
-            className={`inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-xs font-semibold transition ${
-              !category
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-surface text-text hover:border-primary/40 hover:text-primary"
-            }`}
-          >
-            All
-          </button>
-
-          {categories.map((item) => {
-            const isActive = item.slug === category;
-
-            return (
-              <button
-                key={item.slug}
-                type="button"
-                onClick={() =>
-                  updateParams({
-                    category: isActive
-                      ? ""
-                      : item.slug,
-                  })
-                }
-                className={`inline-flex h-9 shrink-0 items-center rounded-full border px-4 text-xs font-semibold transition ${
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-surface text-text hover:border-primary/40 hover:text-primary"
-                }`}
-              >
-                {getCategoryLabel(item)}
-              </button>
-            );
-          })}
+          />
         </div>
 
-        <div className="sticky top-0 z-20 mt-6 border-y border-border bg-background/95 py-4 backdrop-blur">
+        <nav
+          aria-label="Shop categories"
+          className="mt-7 overflow-x-auto scrollbar-none"
+        >
+          <div className="flex min-w-max items-center gap-7 border-b border-border">
+            <button
+              type="button"
+              onClick={() =>
+                updateParams({
+                  category: "",
+                })
+              }
+              className={`relative pb-3 text-xs font-semibold transition-colors ${
+                !category
+                  ? "text-primary"
+                  : "text-text-muted hover:text-text"
+              }`}
+            >
+              All
+
+              {!category && (
+                <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
+
+            {categories.map((item) => {
+              const isActive =
+                item.slug === category;
+
+              return (
+                <button
+                  key={item.slug}
+                  type="button"
+                  onClick={() =>
+                    updateParams({
+                      category: isActive
+                        ? ""
+                        : item.slug,
+                    })
+                  }
+                  className={`relative pb-3 text-xs font-semibold transition-colors ${
+                    isActive
+                      ? "text-primary"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  {getCategoryLabel(item)}
+
+                  {isActive && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <SlidersHorizontal
-                size={18}
-                aria-hidden="true"
-                className="text-primary"
-              />
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/6">
+                <SlidersHorizontal
+                  size={16}
+                  aria-hidden="true"
+                  className="text-primary"
+                />
+              </span>
 
-              <p className="text-sm text-text-muted">
-                <span className="font-semibold text-text">
-                  {total}
-                </span>{" "}
-                {total === 1
-                  ? "product"
-                  : "products"}
-              </p>
+              <div>
+                <p className="text-xs font-semibold text-text">
+                  Shop by preference
+                </p>
+
+                <p className="mt-0.5 text-[10px] text-text-muted">
+                  {total}{" "}
+                  {total === 1
+                    ? "product"
+                    : "products"}{" "}
+                  available
+                </p>
+              </div>
 
               {activeFilterCount > 0 && (
-                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-2 text-[11px] font-bold text-primary-foreground">
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-2 text-[10px] font-bold text-primary-foreground">
                   {activeFilterCount}
                 </span>
               )}
@@ -381,7 +662,7 @@ function Shop() {
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-semibold text-primary transition hover:bg-primary/5"
+                  className="inline-flex h-8 items-center rounded-full px-3 text-[10px] font-semibold text-primary transition-colors hover:bg-primary/5"
                 >
                   Clear all
                 </button>
@@ -389,8 +670,8 @@ function Shop() {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <FilterSelect
+          <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <DropdownSelect
               label="Collection"
               value={collection}
               onChange={(value) =>
@@ -398,22 +679,25 @@ function Shop() {
                   collection: value,
                 })
               }
-            >
-              <option value="">
-                All Collections
-              </option>
+              placeholder="All Collections"
+              options={[
+                {
+                  value: "",
+                  label: "All Collections",
+                },
+                ...collections.map(
+                  (item) => ({
+                    value: item.slug,
+                    label:
+                      getCollectionLabel(
+                        item
+                      ),
+                  })
+                ),
+              ]}
+            />
 
-              {collections.map((item) => (
-                <option
-                  key={item.slug}
-                  value={item.slug}
-                >
-                  {getCollectionLabel(item)}
-                </option>
-              ))}
-            </FilterSelect>
-
-            <FilterSelect
+            <DropdownSelect
               label="Price"
               value={price}
               onChange={(value) =>
@@ -421,109 +705,63 @@ function Shop() {
                   price: value,
                 })
               }
-            >
-              {priceOptions.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                >
-                  {option.label}
-                </option>
-              ))}
-            </FilterSelect>
+              placeholder="All Prices"
+              options={priceOptions}
+            />
 
-        <div className="hidden lg:block">
-  {/* Same space as Collection / Price label */}
-  <div className="mb-1.5 h-[15px]" aria-hidden="true" />
+            <div className="hidden items-center rounded-xl border border-primary/15 bg-primary/[0.035] px-4 lg:flex">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Check
+                    size={14}
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                    className="text-primary"
+                  />
+                </span>
 
-  <div className="flex h-11 w-full items-center gap-3 rounded-full border border-primary/20 bg-primary/[0.035] px-5 shadow-sm">
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-      <Check
-        size={16}
-        strokeWidth={2.5}
-        aria-hidden="true"
-        className="text-primary"
-      />
-    </span>
+                <div>
+                  <p className="text-xs font-semibold text-text">
+                    Available products
+                  </p>
 
-    <span className="text-sm font-semibold text-text">
-      Available products
-    </span>
+                  <p className="mt-0.5 text-[10px] text-text-muted">
+                    Ready to explore
+                  </p>
+                </div>
 
-    <span className="ml-1 h-2 w-2 rounded-full bg-primary" />
-  </div>
-</div>
+                <span className="ml-auto h-2 w-2 rounded-full bg-primary" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="py-8 sm:py-10">
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 10,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.08,
+          }}
+          transition={{
+            duration: 0.45,
+            ease: "easeOut",
+          }}
+          className="pt-7 sm:pt-9"
+        >
           <ProductGrid
             products={products}
             showQuickAdd
           />
-        </div>
+        </motion.div>
       </section>
     </main>
-  );
-}
-
-function FilterTag({ label, onRemove }) {
-  return (
-    <span className="inline-flex h-8 items-center gap-2 rounded-full border border-border bg-surface px-3 text-xs font-medium text-text">
-      <span className="max-w-40 truncate">
-        {label}
-      </span>
-
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Remove ${label} filter`}
-        className="text-text-muted transition hover:text-danger"
-      >
-        <X size={14} />
-      </button>
-    </span>
-  );
-}
-
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  children,
-}) {
-  const id = `shop-filter-${label
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
-  return (
-    <div className="relative">
-      <label
-        htmlFor={id}
-        className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted"
-      >
-        {label}
-      </label>
-
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={(event) =>
-            onChange(event.target.value)
-          }
-          className="h-11 w-full appearance-none rounded-xl border border-border bg-surface px-4 pr-10 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-        >
-          {children}
-        </select>
-
-        <ChevronDown
-          size={16}
-          aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
-        />
-      </div>
-    </div>
   );
 }
 
