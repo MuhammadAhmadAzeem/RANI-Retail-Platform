@@ -1,5 +1,7 @@
 const PAYMENT_STATUS = {
   IDLE: "idle",
+  LOADING: "loading",
+  READY: "ready",
   PENDING: "pending",
   SUCCESS: "success",
   FAILED: "failed",
@@ -7,25 +9,58 @@ const PAYMENT_STATUS = {
 
 const PAYMENT_METHOD_STATUS = {
   AVAILABLE: "available",
+  PLACEHOLDER: "placeholder",
   UNAVAILABLE: "unavailable",
 };
 
+const PAYMENT_METHODS = [
+  {
+    value: "cod",
+    label: "Cash on Delivery",
+    description: "Pay when your order arrives.",
+    status: PAYMENT_METHOD_STATUS.AVAILABLE,
+    placeholderText: "No online payment is required.",
+  },
+  {
+    value: "card",
+    label: "Credit / Debit Card",
+    description: "Pay securely with your bank card.",
+    status: PAYMENT_METHOD_STATUS.PLACEHOLDER,
+    placeholderText:
+      "Visa and Mastercard will be handled by the connected payment gateway.",
+    supportedBrands: ["Visa", "Mastercard"],
+  },
+  {
+    value: "easypaisa",
+    label: "Easypaisa",
+    description: "Pay with your Easypaisa account.",
+    status: PAYMENT_METHOD_STATUS.PLACEHOLDER,
+    placeholderText:
+      "Easypaisa payment will be enabled after the merchant gateway is connected.",
+  },
+  {
+    value: "jazzcash",
+    label: "JazzCash",
+    description: "Pay with your JazzCash wallet.",
+    status: PAYMENT_METHOD_STATUS.PLACEHOLDER,
+    placeholderText:
+      "JazzCash payment will be enabled after the merchant gateway is connected.",
+  },
+  {
+    value: "bank",
+    label: "Bank Transfer",
+    description: "Transfer payment directly from your bank.",
+    status: PAYMENT_METHOD_STATUS.PLACEHOLDER,
+    placeholderText:
+      "Bank transfer instructions will be shown after a real payment workflow is connected.",
+  },
+];
+
 const paymentService = {
-  /**
-   * Returns the payment provider configured for the storefront.
-   * A real provider can be supplied later through environment config.
-   */
   getProvider() {
-    return (
-      import.meta.env.VITE_PAYMENT_PROVIDER ||
-      "unconfigured"
-    );
+    return import.meta.env.VITE_PAYMENT_PROVIDER || "unconfigured";
   },
 
-  /**
-   * Returns the current payment service status.
-   * Kept provider-neutral for the frontend checkout foundation.
-   */
   getStatus() {
     return {
       status: PAYMENT_STATUS.IDLE,
@@ -33,19 +68,65 @@ const paymentService = {
     };
   },
 
-  /**
-   * Payment methods contract.
-   * Real payment methods will be supplied by the payment
-   * provider/backend in a later implementation phase.
-   */
   async getPaymentMethods() {
-    return [];
+    return PAYMENT_METHODS.map((method) => ({
+      ...method,
+      supportedBrands: method.supportedBrands
+        ? [...method.supportedBrands]
+        : undefined,
+    }));
   },
 
-  /**
-   * Creates a payment session abstraction.
-   * Real provider implementation will be connected later.
-   */
+  getPaymentMethodStatus(method) {
+    const selectedMethod = PAYMENT_METHODS.find(
+      (item) => item.value === method
+    );
+
+    if (!selectedMethod) {
+      return PAYMENT_METHOD_STATUS.UNAVAILABLE;
+    }
+
+    return selectedMethod.status;
+  },
+
+  validatePaymentSelection(method) {
+    const selectedMethod = PAYMENT_METHODS.find(
+      (item) => item.value === method
+    );
+
+    if (!selectedMethod) {
+      return {
+        valid: false,
+        message: "Please select a payment method.",
+      };
+    }
+
+    return {
+      valid: true,
+      method: selectedMethod,
+    };
+  },
+
+  async preparePaymentReview({
+    method,
+    total = 0,
+  } = {}) {
+    const validation =
+      this.validatePaymentSelection(method);
+
+    if (!validation.valid) {
+      throw new Error(validation.message);
+    }
+
+    return {
+      status: PAYMENT_STATUS.READY,
+      provider: this.getProvider(),
+      method: validation.method.value,
+      total,
+      processing: false,
+    };
+  },
+
   async createPaymentSession(payload = {}) {
     return {
       status: PAYMENT_STATUS.PENDING,
@@ -55,9 +136,6 @@ const paymentService = {
     };
   },
 
-  /**
-   * Confirms a payment through the future payment provider.
-   */
   async confirmPayment(payload = {}) {
     return {
       status: PAYMENT_STATUS.PENDING,
@@ -66,20 +144,10 @@ const paymentService = {
       transaction: null,
     };
   },
-
-  /**
-   * Checks whether a payment method can currently be used.
-   */
-  getPaymentMethodStatus(method) {
-    if (!method) {
-      return PAYMENT_METHOD_STATUS.UNAVAILABLE;
-    }
-
-    return PAYMENT_METHOD_STATUS.UNAVAILABLE;
-  },
 };
 
 export {
+  PAYMENT_METHODS,
   PAYMENT_METHOD_STATUS,
   PAYMENT_STATUS,
 };
