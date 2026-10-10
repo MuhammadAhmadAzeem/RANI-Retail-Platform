@@ -1,3 +1,9 @@
+
+/* ========================================
+   RANI — Global Animations
+   ======================================== */
+
+/* Fade In */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -8,6 +14,7 @@
   }
 }
 
+/* Slide Up */
 @keyframes slide-up {
   from {
     opacity: 0;
@@ -20,6 +27,7 @@
   }
 }
 
+/* Scale In */
 @keyframes scale-in {
   from {
     opacity: 0;
@@ -32,6 +40,7 @@
   }
 }
 
+/* Soft Pulse */
 @keyframes pulse-soft {
   0%,
   100% {
@@ -43,21 +52,71 @@
   }
 }
 
+/* ========================================
+   RANI — Order Success Animations
+   ======================================== */
+
+/* Success Icon Pop */
+@keyframes rani-success-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Checkmark Drawing Animation */
+@keyframes rani-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ========================================
+   Animation Utility Classes
+   ======================================== */
+
 .animate-fade-in {
-  animation: fade-in 250ms ease-out;
+  animation: fade-in 250ms ease-out both;
 }
 
 .animate-slide-up {
-  animation: slide-up 350ms ease-out;
+  animation: slide-up 350ms ease-out both;
 }
 
 .animate-scale-in {
-  animation: scale-in 250ms ease-out;
+  animation: scale-in 250ms ease-out both;
 }
 
 .animate-pulse-soft {
   animation: pulse-soft 1.8s ease-in-out infinite;
 }
+
+/* Order Success Icon */
+.rani-success-pop {
+  animation: rani-success-pop 650ms
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Order Success Checkmark */
+.rani-success-check path {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  animation: rani-check-draw 450ms 280ms ease-out forwards;
+}
+
+/* ========================================
+   Accessibility — Reduced Motion
+   ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowRight,
   Heart,
   MapPin,
@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 
 import useAuthStore from "../../store/authStore";
 import useWishlistStore from "../../store/wishlistStore";
+import { getOrders } from "../../data/mock/orders";
 
 const accountActions = [
   {
@@ -42,6 +43,8 @@ const accountActions = [
 
 function Account() {
   const user = useAuthStore((state) => state.user);
+
+  const orderCount = getOrders().length;
 
   const wishlistCount = useWishlistStore(
     (state) => state.items.length
@@ -125,7 +128,9 @@ function Account() {
                 </p>
 
                 <p className="mt-0.5 text-xs text-text-muted">
-                  No orders yet
+                  {orderCount > 0
+                    ? `${orderCount} ${orderCount === 1 ? "order placed" : "orders placed"}`
+                    : "No orders yet"}
                 </p>
               </div>
             </div>

@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
@@ -8,7 +9,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { z } from "zod";
 
 import useAuthStore from "../../store/authStore";
@@ -28,6 +33,8 @@ const loginSchema = z.object({
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const login = useAuthStore((state) => state.login);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +57,28 @@ function Login() {
       email: data.email,
     });
 
-    navigate("/account");
+    const from = location.state?.from;
+    const pathname = from?.pathname;
+
+    // Only allow redirects to internal customer account pages.
+    const isValidAccountPath =
+      typeof pathname === "string" &&
+      (pathname === "/account" ||
+        pathname.startsWith("/account/")) &&
+      pathname !== "/account/login" &&
+      pathname !== "/account/register";
+
+    const destination = isValidAccountPath
+      ? {
+          pathname,
+          search:
+            typeof from.search === "string" ? from.search : "",
+          hash:
+            typeof from.hash === "string" ? from.hash : "",
+        }
+      : "/account";
+
+    navigate(destination, { replace: true });
   };
 
   return (
@@ -173,9 +201,7 @@ function Login() {
 
                   <input
                     id="password"
-                    type={
-                      showPassword ? "text" : "password"
-                    }
+                    type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     aria-invalid={Boolean(errors.password)}
@@ -207,15 +233,9 @@ function Login() {
                     className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     {showPassword ? (
-                      <EyeOff
-                        size={17}
-                        aria-hidden="true"
-                      />
+                      <EyeOff size={17} aria-hidden="true" />
                     ) : (
-                      <Eye
-                        size={17}
-                        aria-hidden="true"
-                      />
+                      <Eye size={17} aria-hidden="true" />
                     )}
                   </button>
                 </div>
@@ -256,6 +276,7 @@ function Login() {
 
                 <Link
                   to="/account/register"
+                  state={location.state}
                   className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   Create an account

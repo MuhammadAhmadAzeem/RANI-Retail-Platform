@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from "react-router-dom";
 import StoreLayout from "../layouts/StoreLayout";
 
@@ -5,6 +6,9 @@ export const router = createBrowserRouter([
   {
     element: <StoreLayout />,
     children: [
+      // =========================================================
+      // HOME
+      // =========================================================
       {
         index: true,
         lazy: async () => ({
@@ -12,6 +16,9 @@ export const router = createBrowserRouter([
         }),
       },
 
+      // =========================================================
+      // SHOPPING
+      // =========================================================
       {
         path: "shop",
         lazy: async () => ({
@@ -74,12 +81,14 @@ export const router = createBrowserRouter([
       },
 
       // =========================================================
-      // CUSTOMER ACCOUNT
+      // PROTECTED CUSTOMER ACCOUNT
       // =========================================================
       {
         path: "account",
         lazy: async () => ({
-          Component: (await import("../layouts/AccountLayout")).default,
+          Component: (
+            await import("../layouts/ProtectedAccountLayout")
+          ).default,
         }),
         children: [
           {
@@ -138,7 +147,7 @@ export const router = createBrowserRouter([
       },
 
       // =========================================================
-      // CUSTOMER SHOPPING
+      // CUSTOMER WISHLIST
       // =========================================================
       {
         path: "wishlist",
@@ -147,6 +156,9 @@ export const router = createBrowserRouter([
         }),
       },
 
+      // =========================================================
+      // CART
+      // =========================================================
       {
         path: "cart",
         lazy: async () => ({
@@ -185,7 +197,7 @@ export const router = createBrowserRouter([
       },
 
       // =========================================================
-      // FALLBACK
+      // 404 FALLBACK
       // =========================================================
       {
         path: "*",

@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { z } from "zod";
 
 import useAuthStore from "../../store/authStore";
@@ -46,6 +50,8 @@ const registerSchema = z
 
 function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const registerUser = useAuthStore(
     (state) => state.register
   );
@@ -72,11 +78,37 @@ function Register() {
 
   const onSubmit = (data) => {
     registerUser({
-      name: data.name,
-      email: data.email,
+      name: data.name.trim(),
+      email: data.email.trim(),
     });
 
-    navigate("/account");
+    // Restore the original protected account destination.
+    const from = location.state?.from;
+    const pathname = from?.pathname;
+
+    // Only allow redirects to internal customer account pages.
+    const isValidAccountPath =
+      typeof pathname === "string" &&
+      (pathname === "/account" ||
+        pathname.startsWith("/account/")) &&
+      pathname !== "/account/login" &&
+      pathname !== "/account/register";
+
+    const destination = isValidAccountPath
+      ? {
+          pathname,
+          search:
+            typeof from.search === "string"
+              ? from.search
+              : "",
+          hash:
+            typeof from.hash === "string"
+              ? from.hash
+              : "",
+        }
+      : "/account";
+
+    navigate(destination, { replace: true });
   };
 
   return (
@@ -138,7 +170,6 @@ function Register() {
 
                   <input
                     id="name"
-                    name="name"
                     type="text"
                     autoComplete="name"
                     placeholder="Your full name"
@@ -194,7 +225,6 @@ function Register() {
 
                   <input
                     id="email"
-                    name="email"
                     type="email"
                     autoComplete="email"
                     placeholder="you@example.com"
@@ -250,7 +280,6 @@ function Register() {
 
                   <input
                     id="password"
-                    name="password"
                     type={
                       showPassword ? "text" : "password"
                     }
@@ -337,7 +366,6 @@ function Register() {
 
                   <input
                     id="confirmPassword"
-                    name="confirmPassword"
                     type={
                       showConfirmPassword
                         ? "text"
@@ -429,6 +457,7 @@ function Register() {
 
                 <Link
                   to="/account/login"
+                  state={location.state}
                   className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   Sign in
@@ -455,4 +484,5 @@ function Register() {
     </main>
   );
 }
+
 export default Register;
