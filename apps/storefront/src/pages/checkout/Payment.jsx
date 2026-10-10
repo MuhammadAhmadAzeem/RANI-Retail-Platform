@@ -16,12 +16,17 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   FaCcMastercard,
   FaCcVisa,
 } from "react-icons/fa";
 
+import { createOrder } from "../../data/mock/orders";
 import paymentService, {
   PAYMENT_METHODS,
   PAYMENT_METHOD_STATUS,
@@ -45,21 +50,20 @@ const PAYMENT_LOGO_URLS = {
 
 function Payment() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const items = useCartStore((state) => state.items);
   const getSubtotal = useCartStore((state) => state.getSubtotal);
+  const clearCart = useCartStore((state) => state.clearCart);
 
-  const [selectedMethod, setSelectedMethod] =
-    useState("cod");
+  const [selectedMethod, setSelectedMethod] = useState("cod");
   const [showReview, setShowReview] = useState(false);
-  const [isPreparingReview, setIsPreparingReview] =
-    useState(false);
+  const [isPreparingReview, setIsPreparingReview] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [paymentError, setPaymentError] = useState("");
 
   const subtotal = getSubtotal();
-
-  const shippingDetails =
-    location.state?.shippingDetails || null;
+  const shippingDetails = location.state?.shippingDetails || null;
 
   const selectedPayment =
     PAYMENT_METHODS.find(
@@ -78,7 +82,7 @@ function Payment() {
       : "Standard Delivery";
 
   const handleSelectMethod = (method) => {
-    if (isPreparingReview) return;
+    if (isPreparingReview || isPlacingOrder) return;
 
     setSelectedMethod(method);
     setPaymentError("");
@@ -86,12 +90,19 @@ function Payment() {
   };
 
   const handleContinueToReview = async () => {
+    if (isPreparingReview || isPlacingOrder) return;
+
     setPaymentError("");
 
-    const validation =
-      paymentService.validatePaymentSelection(
-        selectedMethod
+    if (!shippingDetails) {
+      setPaymentError(
+        "Please complete your shipping details before continuing."
       );
+      return;
+    }
+
+    const validation =
+      paymentService.validatePaymentSelection(selectedMethod);
 
     if (!validation.valid) {
       setPaymentError(validation.message);
@@ -110,7 +121,7 @@ function Payment() {
     } catch (error) {
       setPaymentError(
         error?.message ||
-          "We could not prepare your payment review. Please try again."
+        "We could not prepare your payment review. Please try again."
       );
     } finally {
       setIsPreparingReview(false);
@@ -118,8 +129,68 @@ function Payment() {
   };
 
   const handlePaymentStep = () => {
+    if (isPlacingOrder) return;
+
     setPaymentError("");
     setShowReview(false);
+  };
+
+  const handlePlaceOrder = () => {
+    if (isPlacingOrder || isPreparingReview) return;
+
+    setPaymentError("");
+
+    if (!items.length) {
+      setPaymentError(
+        "Your shopping bag is empty. Add an item before placing an order."
+      );
+      return;
+    }
+
+    if (!shippingDetails) {
+      setPaymentError(
+        "Your shipping details are missing. Please return to Shipping and complete your delivery information."
+      );
+      return;
+    }
+
+    if (
+      paymentService.getPaymentMethodStatus(selectedMethod) !==
+      PAYMENT_METHOD_STATUS.AVAILABLE
+    ) {
+      setPaymentError(
+        "This payment method is not connected yet. Please select Cash on Delivery."
+      );
+      return;
+    }
+
+    setIsPlacingOrder(true);
+
+    try {
+      const order = createOrder({
+        items,
+        shippingDetails,
+        paymentMethod: selectedMethod,
+        subtotal,
+      });
+
+      // Clear the cart only after createOrder succeeds.
+      clearCart();
+
+      navigate("/checkout/success", {
+        replace: true,
+        state: {
+          orderId: order.id,
+        },
+      });
+    } catch (error) {
+      setPaymentError(
+        error?.message ||
+        "We could not save your order. Your cart has been preserved. Please try again."
+      );
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   if (items.length === 0) {
@@ -153,10 +224,7 @@ function Payment() {
               className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               Continue Shopping
-              <ArrowRight
-                size={15}
-                aria-hidden="true"
-              />
+              <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -173,10 +241,7 @@ function Payment() {
             to="/cart"
             className="inline-flex items-center gap-2 text-xs font-medium text-text-muted transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
-            <ArrowLeft
-              size={14}
-              aria-hidden="true"
-            />
+            <ArrowLeft size={14} aria-hidden="true" />
             Back to bag
           </Link>
 
@@ -214,9 +279,7 @@ function Payment() {
                   />
                 </span>
 
-                <span className="hidden sm:inline">
-                  Shipping
-                </span>
+                <span className="hidden sm:inline">Shipping</span>
               </Link>
 
               <ChevronRight
@@ -228,18 +291,17 @@ function Payment() {
               <button
                 type="button"
                 onClick={handlePaymentStep}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors ${
-                  !showReview
+                disabled={isPlacingOrder}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${!showReview
                     ? "bg-primary text-primary-foreground"
                     : "text-success hover:bg-success/[0.05]"
-                }`}
+                  }`}
               >
                 <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                    !showReview
+                  className={`flex h-5 w-5 items-center justify-center rounded-full ${!showReview
                       ? "bg-white/10"
                       : "bg-success text-white"
-                  }`}
+                    }`}
                 >
                   {showReview ? (
                     <Check
@@ -252,9 +314,7 @@ function Payment() {
                   )}
                 </span>
 
-                <span className="hidden sm:inline">
-                  Payment
-                </span>
+                <span className="hidden sm:inline">Payment</span>
               </button>
 
               <ChevronRight
@@ -266,19 +326,17 @@ function Payment() {
               <button
                 type="button"
                 onClick={handleContinueToReview}
-                disabled={isPreparingReview}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                  showReview
+                disabled={isPreparingReview || isPlacingOrder}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${showReview
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-surface text-text-muted hover:border-primary/20 hover:text-primary"
-                }`}
+                  }`}
               >
                 <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                    showReview
+                  className={`flex h-5 w-5 items-center justify-center rounded-full ${showReview
                       ? "bg-white/10"
                       : "bg-surface-muted"
-                  }`}
+                    }`}
                 >
                   {showReview ? (
                     <Check
@@ -292,9 +350,7 @@ function Payment() {
                   )}
                 </span>
 
-                <span className="hidden sm:inline">
-                  Review
-                </span>
+                <span className="hidden sm:inline">Review</span>
               </button>
             </nav>
           </div>
@@ -336,34 +392,30 @@ function Payment() {
                         PAYMENT_METHOD_STATUS.PLACEHOLDER;
 
                       const MethodIcon =
-                        METHOD_ICONS[method.value] ||
-                        CreditCard;
+                        METHOD_ICONS[method.value] || CreditCard;
 
                       return (
                         <button
                           key={method.value}
                           type="button"
                           onClick={() =>
-                            handleSelectMethod(
-                              method.value
-                            )
+                            handleSelectMethod(method.value)
                           }
                           aria-pressed={isSelected}
-                          className={`group w-full px-5 py-5 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary/20 sm:px-6 ${
-                            isSelected
+                          disabled={isPlacingOrder}
+                          className={`group w-full px-5 py-5 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60 sm:px-6 ${isSelected
                               ? "bg-primary/[0.025]"
                               : "bg-surface hover:bg-background"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-4">
                             {/* Radio */}
                             <span
                               aria-hidden="true"
-                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
-                                isSelected
+                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${isSelected
                                   ? "border-primary"
                                   : "border-border"
-                              }`}
+                                }`}
                             >
                               {isSelected && (
                                 <span className="h-2.5 w-2.5 rounded-full bg-primary" />
@@ -372,56 +424,42 @@ function Payment() {
 
                             {/* Icon */}
                             <div className="flex h-10 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-white">
-                              {method.value ===
-                                "easypaisa" ? (
+                              {method.value === "easypaisa" ? (
                                 <img
-                                  src={
-                                    PAYMENT_LOGO_URLS.easypaisa
-                                  }
+                                  src={PAYMENT_LOGO_URLS.easypaisa}
                                   alt="Easypaisa"
                                   className="max-h-7 w-auto max-w-[42px] object-contain"
                                   loading="lazy"
                                   referrerPolicy="no-referrer"
-                                  onError={(
-                                    event
-                                  ) => {
+                                  onError={(event) => {
                                     event.currentTarget.style.display =
                                       "none";
+
                                     const fallback =
-                                      event.currentTarget
-                                        .nextElementSibling;
+                                      event.currentTarget.nextElementSibling;
 
                                     if (fallback) {
-                                      fallback.classList.remove(
-                                        "hidden"
-                                      );
+                                      fallback.classList.remove("hidden");
                                     }
                                   }}
                                 />
-                              ) : method.value ===
-                                "jazzcash" ? (
+                              ) : method.value === "jazzcash" ? (
                                 <>
                                   <img
-                                    src={
-                                      PAYMENT_LOGO_URLS.jazzcash
-                                    }
+                                    src={PAYMENT_LOGO_URLS.jazzcash}
                                     alt=""
                                     className="h-7 w-7 object-contain"
                                     loading="lazy"
                                     referrerPolicy="no-referrer"
-                                    onError={(
-                                      event
-                                    ) => {
+                                    onError={(event) => {
                                       event.currentTarget.style.display =
                                         "none";
+
                                       const fallback =
-                                        event.currentTarget
-                                          .nextElementSibling;
+                                        event.currentTarget.nextElementSibling;
 
                                       if (fallback) {
-                                        fallback.classList.remove(
-                                          "hidden"
-                                        );
+                                        fallback.classList.remove("hidden");
                                       }
                                     }}
                                   />
@@ -430,8 +468,7 @@ function Payment() {
                                     JC
                                   </span>
                                 </>
-                              ) : method.value ===
-                                "card" ? (
+                              ) : method.value === "card" ? (
                                 <div className="flex items-center gap-1.5">
                                   <FaCcVisa
                                     size={24}
@@ -477,41 +514,31 @@ function Payment() {
                                 {method.description}
                               </p>
 
-                              {method.value ===
-                                "card" && (
+                              {method.value === "card" && (
                                 <p className="mt-1.5 text-[10px] text-text-muted">
                                   Visa and Mastercard accepted
                                 </p>
                               )}
 
-                              {method.value ===
-                                "cod" && (
+                              {method.value === "cod" && (
                                 <p className="mt-1.5 text-[10px] font-medium text-success">
                                   No online payment required
                                 </p>
                               )}
 
-                              {method.value ===
-                                "easypaisa" && (
-                                <p className="mt-1.5 text-[10px] text-text-muted">
-                                  Local mobile wallet payment
-                                </p>
-                              )}
-
-                              {method.value ===
-                                "jazzcash" && (
-                                <p className="mt-1.5 text-[10px] text-text-muted">
-                                  Local mobile wallet payment
-                                </p>
-                              )}
+                              {(method.value === "easypaisa" ||
+                                method.value === "jazzcash") && (
+                                  <p className="mt-1.5 text-[10px] text-text-muted">
+                                    Local mobile wallet payment
+                                  </p>
+                                )}
                             </div>
 
                             <span
-                              className={`shrink-0 text-xs font-semibold ${
-                                isSelected
+                              className={`shrink-0 text-xs font-semibold ${isSelected
                                   ? "text-primary"
                                   : "text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
-                              }`}
+                                }`}
                               aria-hidden="true"
                             >
                               ✓
@@ -588,8 +615,7 @@ function Payment() {
 
                           {shippingDetails.landmark && (
                             <p className="mt-2 text-xs text-text-muted">
-                              Landmark:{" "}
-                              {shippingDetails.landmark}
+                              Landmark: {shippingDetails.landmark}
                             </p>
                           )}
                         </div>
@@ -597,8 +623,8 @@ function Payment() {
                     ) : (
                       <div className="rounded-lg bg-background px-4 py-3">
                         <p className="text-xs leading-5 text-text-muted">
-                          Please return to Shipping to
-                          confirm your delivery details.
+                          Please return to Shipping to confirm your
+                          delivery details.
                         </p>
                       </div>
                     )}
@@ -619,10 +645,9 @@ function Payment() {
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-text-muted">
-                      Card and wallet credentials are not
-                      collected or stored on this page. They
-                      will only be entered through a real payment
-                      provider once connected.
+                      Card and wallet credentials are not collected
+                      or stored on this page. They will only be entered
+                      through a real payment provider once connected.
                     </p>
                   </div>
                 </div>
@@ -643,7 +668,7 @@ function Payment() {
                 <button
                   type="button"
                   onClick={handleContinueToReview}
-                  disabled={isPreparingReview}
+                  disabled={isPreparingReview || isPlacingOrder}
                   className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isPreparingReview ? (
@@ -658,10 +683,7 @@ function Payment() {
                   ) : (
                     <>
                       Continue to Review
-                      <ArrowRight
-                        size={15}
-                        aria-hidden="true"
-                      />
+                      <ArrowRight size={15} aria-hidden="true" />
                     </>
                   )}
                 </button>
@@ -682,15 +704,16 @@ function Payment() {
                         </h2>
 
                         <p className="mt-1.5 text-sm leading-6 text-text-muted">
-                          Check your payment and delivery
-                          details before the order is finalized.
+                          Check your payment and delivery details
+                          before the order is finalized.
                         </p>
                       </div>
 
                       <button
                         type="button"
                         onClick={handlePaymentStep}
-                        className="text-xs font-semibold text-primary hover:text-primary-hover"
+                        disabled={isPlacingOrder}
+                        className="text-xs font-semibold text-primary hover:text-primary-hover disabled:opacity-60"
                       >
                         Change
                       </button>
@@ -698,6 +721,7 @@ function Payment() {
                   </div>
 
                   <div className="divide-y divide-border">
+                    {/* Payment Method */}
                     <div className="px-5 py-5 sm:px-6">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                         Payment method
@@ -727,6 +751,7 @@ function Payment() {
                       </div>
                     </div>
 
+                    {/* Delivery */}
                     <div className="px-5 py-5 sm:px-6">
                       <div className="flex items-center justify-between gap-4">
                         <div>
@@ -770,6 +795,7 @@ function Payment() {
                       )}
                     </div>
 
+                    {/* Items */}
                     <div className="px-5 py-5 sm:px-6">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                         Items
@@ -807,25 +833,17 @@ function Payment() {
                                 {item.name}
                               </p>
 
-                              {(item.size ||
-                                item.color) && (
+                              {(item.size || item.color) && (
                                 <p className="mt-1 text-[11px] text-text-muted">
-                                  {item.size &&
-                                    `Size: ${item.size}`}
-                                  {item.size &&
-                                    item.color &&
-                                    " • "}
-                                  {item.color &&
-                                    `Color: ${item.color}`}
+                                  {item.size && `Size: ${item.size}`}
+                                  {item.size && item.color && " • "}
+                                  {item.color && `Color: ${item.color}`}
                                 </p>
                               )}
 
                               <p className="mt-1.5 text-xs font-semibold text-text">
                                 Rs.{" "}
-                                {(
-                                  item.price *
-                                  item.quantity
-                                ).toLocaleString()}
+                                {(item.price * item.quantity).toLocaleString()}
                               </p>
                             </div>
                           </div>
@@ -833,6 +851,7 @@ function Payment() {
                       </div>
                     </div>
 
+                    {/* Payment Notice */}
                     <div className="px-5 py-5 sm:px-6">
                       <div className="flex items-start gap-3 rounded-xl bg-background px-4 py-4">
                         <ShieldCheck
@@ -842,24 +861,68 @@ function Payment() {
                         />
 
                         <p className="text-xs leading-5 text-text-muted">
-                          Your checkout details are ready. No
-                          real online payment has been processed
-                          on this screen.
+                          {selectedMethod === "cod"
+                            ? "Your order will be recorded as pending. Payment is due when your order arrives."
+                            : "Online payment is not connected. Select Cash on Delivery to place an order."}
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* Order placement error */}
+                {paymentError && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-danger/20 bg-danger/[0.04] px-4 py-3.5"
+                  >
+                    <p className="text-sm font-medium text-danger">
+                      {paymentError}
+                    </p>
+                  </div>
+                )}
+
+                {/* Place Order */}
+                {paymentService.getPaymentMethodStatus(selectedMethod) ===
+                  PAYMENT_METHOD_STATUS.AVAILABLE ? (
+                  <button
+                    type="button"
+                    onClick={handlePlaceOrder}
+                    disabled={isPlacingOrder || isPreparingReview}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isPlacingOrder ? (
+                      <>
+                        <LoaderCircle
+                          size={16}
+                          className="animate-spin"
+                          aria-hidden="true"
+                        />
+                        Placing your order...
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} aria-hidden="true" />
+                        Place Order — Cash on Delivery
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-border bg-surface px-4 py-4">
+                    <p className="text-sm leading-6 text-text-muted">
+                      This payment method is coming soon. Go back
+                      and select Cash on Delivery to place your order.
+                    </p>
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={handlePaymentStep}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm font-semibold text-text transition-colors hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  disabled={isPlacingOrder}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-surface px-5 py-3 text-sm font-semibold text-text transition-colors hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <ArrowLeft
-                    size={15}
-                    aria-hidden="true"
-                  />
+                  <ArrowLeft size={15} aria-hidden="true" />
                   Back to Payment
                 </button>
               </div>
@@ -913,22 +976,15 @@ function Payment() {
 
                       {(item.size || item.color) && (
                         <p className="mt-1 text-[10px] text-text-muted">
-                          {item.size &&
-                            `Size: ${item.size}`}
-                          {item.size &&
-                            item.color &&
-                            " • "}
-                          {item.color &&
-                            `Color: ${item.color}`}
+                          {item.size && `Size: ${item.size}`}
+                          {item.size && item.color && " • "}
+                          {item.color && `Color: ${item.color}`}
                         </p>
                       )}
 
                       <p className="mt-1.5 text-xs font-semibold text-text">
                         Rs.{" "}
-                        {(
-                          item.price *
-                          item.quantity
-                        ).toLocaleString()}
+                        {(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -937,9 +993,7 @@ function Payment() {
 
               <div className="space-y-3 px-5 py-5 sm:px-6">
                 <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="text-text-muted">
-                    Subtotal
-                  </span>
+                  <span className="text-text-muted">Subtotal</span>
 
                   <span className="font-semibold text-text">
                     Rs. {subtotal.toLocaleString()}
@@ -947,9 +1001,7 @@ function Payment() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="text-text-muted">
-                    Delivery
-                  </span>
+                  <span className="text-text-muted">Delivery</span>
 
                   <span className="text-xs font-medium text-text-muted">
                     Confirmed at checkout
@@ -984,21 +1036,16 @@ function Payment() {
                   />
 
                   <p className="text-[10px] leading-5 text-text-muted">
-                    Your payment credentials are never stored
-                    in this frontend checkout.
+                    Your payment credentials are never stored in this
+                    frontend checkout.
                   </p>
                 </div>
               </div>
 
               <div className="px-5 py-5 sm:px-6">
                 <div className="flex items-center gap-2 text-[10px] font-medium text-text-muted">
-                  <Package
-                    size={14}
-                    aria-hidden="true"
-                  />
-                  <span>
-                    {shippingMethodLabel}
-                  </span>
+                  <Package size={14} aria-hidden="true" />
+                  <span>{shippingMethodLabel}</span>
                 </div>
               </div>
             </div>

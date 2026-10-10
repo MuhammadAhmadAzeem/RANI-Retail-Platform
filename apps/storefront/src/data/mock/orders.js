@@ -1,51 +1,197 @@
-import { ArrowRight, PackageOpen, ShoppingBag } from "lucide-react";
-import { Link } from "react-router-dom";
 
-function Orders() {
-  return (
-    <main className="min-h-[70vh] bg-background">
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">
-            Account
-          </p>
+const ORDERS_STORAGE_KEY = "rani-orders";
 
-          <h1 className="mt-3 font-heading text-3xl font-medium text-text sm:text-4xl">
-            Your Orders
-          </h1>
+export const ORDER_STATUSES = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  PROCESSING: "Processing",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+  RETURNED: "Returned",
+};
 
-          <p className="mt-3 max-w-xl text-sm leading-6 text-text-muted">
-            View your recent purchases and keep track of your
-            orders from one place.
-          </p>
-        </div>
+export const PAYMENT_STATUSES = {
+  PENDING: "Pending",
+  PAID: "Paid",
+  FAILED: "Failed",
+  REFUNDED: "Refunded",
+};
 
-        <div className="mt-8 rounded-2xl border border-border bg-surface p-6 text-center shadow-sm sm:p-10">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-muted text-primary">
-            <PackageOpen size={28} strokeWidth={1.8} aria-hidden="true" />
-          </div>
+export const ORDER_STATUS_STEPS = [
+  ORDER_STATUSES.PENDING,
+  ORDER_STATUSES.CONFIRMED,
+  ORDER_STATUSES.PROCESSING,
+  ORDER_STATUSES.SHIPPED,
+  ORDER_STATUSES.DELIVERED,
+];
 
-          <h2 className="mt-6 font-heading text-2xl font-medium text-text">
-            No orders yet
-          </h2>
+const getTimestamp = () => new Date().toISOString();
 
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-muted">
-            You haven&apos;t placed any orders yet. Explore our
-            collection and find something you&apos;ll love.
-          </p>
+const readStoredOrders = () => {
+  if (typeof window === "undefined") return [];
 
-          <Link
-            to="/shop"
-            className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <ShoppingBag size={16} aria-hidden="true" />
-            Start Shopping
-            <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
-    </main>
+  try {
+    const stored = localStorage.getItem(ORDERS_STORAGE_KEY);
+    const orders = stored ? JSON.parse(stored) : [];
+
+    return Array.isArray(orders) ? orders : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeStoredOrders = (orders) => {
+  if (typeof window === "undefined") {
+    throw new Error("Order storage is unavailable.");
+  }
+
+  localStorage.setItem(
+    ORDERS_STORAGE_KEY,
+    JSON.stringify(orders)
   );
-}
+};
 
-export default Orders;
+export const getOrders = () =>
+  readStoredOrders().sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() -
+      new Date(a.createdAt).getTime()
+  );
+
+export const getOrderById = (orderId) =>
+  readStoredOrders().find(
+    (order) =>
+      order.id === orderId ||
+      order.orderNumber === orderId
+  ) || null;
+
+export const createOrder = ({
+  items = [],
+  shippingDetails = {},
+  paymentMethod = "cod",
+  subtotal = 0,
+  customer = null,
+}) => {
+  if (!items.length) {
+    throw new Error("Your order must contain at least one item.");
+  }
+
+  const now = getTimestamp();
+  const id = `order-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
+
+  const orderItems = items.map((item) => ({
+    productId: item.productId,
+    name: item.name,
+    image: item.image || "",
+    price: Number(item.price) || 0,
+    quantity: Math.max(1, Number(item.quantity) || 1),
+    size: item.size || "",
+    color: item.color || "",
+  }));
+
+  const safeSubtotal = Math.max(0, Number(subtotal) || 0);
+
+  const order = {
+    id,
+    orderNumber: `RANI-${Date.now().toString().slice(-8)}`,
+    createdAt: now,
+    updatedAt: now,
+    status: ORDER_STATUSES.PENDING,
+    paymentMethod,
+    paymentStatus: PAYMENT_STATUSES.PENDING,
+    subtotal: safeSubtotal,
+    shippingFee: 0,
+    total: safeSubtotal,
+    currency: "PKR",
+    items: orderItems,
+    itemCount: orderItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    ),
+    customer: {
+      name:
+        shippingDetails.fullName ||
+        shippingDetails.name ||
+        customer?.name ||
+        "",
+      email: shippingDetails.email || customer?.email || "",
+      phone: shippingDetails.phone || "",
+    },
+    shippingAddress: {
+      address:
+        shippingDetails.address ||
+        shippingDetails.streetAddress ||
+        "",
+      city: shippingDetails.city || "",
+      state:
+        shippingDetails.state ||
+        shippingDetails.province ||
+        "",
+      postalCode:
+        shippingDetails.postalCode ||
+        shippingDetails.zipCode ||
+        "",
+      country: shippingDetails.country || "Pakistan",
+      shippingMethod:
+        shippingDetails.shippingMethod || "standard",
+    },
+    timeline: [
+      {
+        status: ORDER_STATUSES.PENDING,
+        title: "Order placed",
+        description:
+          "Your order has been recorded and is awaiting confirmation.",
+        timestamp: now,
+      },
+    ],
+  };
+
+  writeStoredOrders([order, ...readStoredOrders()]);
+
+  return order;
+};
+
+export const updateOrderStatus = (
+  orderId,
+  nextStatus,
+  description = ""
+) => {
+  if (!Object.values(ORDER_STATUSES).includes(nextStatus)) {
+    throw new Error("Invalid order status.");
+  }
+
+  const orders = readStoredOrders();
+  const index = orders.findIndex(
+    (order) => order.id === orderId
+  );
+
+  if (index === -1) return null;
+
+  const now = getTimestamp();
+  const order = orders[index];
+
+  const updatedOrder = {
+    ...order,
+    status: nextStatus,
+    updatedAt: now,
+    timeline: [
+      ...(order.timeline || []),
+      {
+        status: nextStatus,
+        title: `Order ${nextStatus.toLowerCase()}`,
+        description:
+          description ||
+          `Your order status is now ${nextStatus.toLowerCase()}.`,
+        timestamp: now,
+      },
+    ],
+  };
+
+  orders[index] = updatedOrder;
+  writeStoredOrders(orders);
+
+  return updatedOrder;
+};
