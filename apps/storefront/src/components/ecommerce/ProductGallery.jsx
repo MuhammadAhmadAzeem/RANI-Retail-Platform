@@ -1,181 +1,319 @@
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
+  ImageOff,
+  Maximize2,
+  X,
 } from "lucide-react";
-import { useState } from "react";
 
-function ProductGallery({
+const ProductGallery = ({
   images = [],
   productName = "Product",
   badge,
-}) {
+}) => {
   const [activeImage, setActiveImage] = useState(0);
+  const [failedImages, setFailedImages] = useState([]);
+  const [isZoomed, setIsZoomed] = useState(false);
 
-  const hasImages = images.length > 0;
-  const hasMultipleImages = images.length > 1;
+  const validImages = images.filter(
+    (image) => typeof image === "string" && image.trim().length > 0
+  );
 
-  const currentImage = images[activeImage];
+  const imageCount = validImages.length;
 
-  const showPreviousImage = () => {
-    if (!hasMultipleImages) {
-      return;
-    }
+  // Keep the displayed image index valid without synchronously
+  // updating state inside an effect.
+  const safeActiveImage = Math.min(
+    activeImage,
+    Math.max(imageCount - 1, 0)
+  );
 
+  const currentImage = validImages[safeActiveImage];
+
+  // Close the zoom viewer and restore scrolling when it closes.
+  useEffect(() => {
+    if (!isZoomed) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsZoomed(false);
+      }
+
+      if (event.key === "ArrowRight") {
+        setActiveImage((current) =>
+          imageCount
+            ? (Math.min(current, imageCount - 1) + 1) % imageCount
+            : 0
+        );
+      }
+
+      if (event.key === "ArrowLeft") {
+        setActiveImage((current) =>
+          imageCount
+            ? (Math.min(current, imageCount - 1) - 1 + imageCount) %
+              imageCount
+            : 0
+        );
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isZoomed, imageCount]);
+
+  const showPrevious = () => {
     setActiveImage((current) =>
-      current === 0 ? images.length - 1 : current - 1
+      imageCount
+        ? (Math.min(current, imageCount - 1) - 1 + imageCount) %
+          imageCount
+        : 0
     );
   };
 
-  const showNextImage = () => {
-    if (!hasMultipleImages) {
-      return;
-    }
-
+  const showNext = () => {
     setActiveImage((current) =>
-      current === images.length - 1 ? 0 : current + 1
+      imageCount
+        ? (Math.min(current, imageCount - 1) + 1) % imageCount
+        : 0
     );
   };
 
-  const handleKeyDown = (event) => {
-    if (!hasMultipleImages) {
-      return;
-    }
-
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      showPreviousImage();
-    }
-
-    if (event.key === "ArrowRight") {
-      event.preventDefault();
-      showNextImage();
-    }
+  const handleImageError = (image) => {
+    setFailedImages((current) =>
+      current.includes(image) ? current : [...current, image]
+    );
   };
 
-  if (!hasImages) {
-    return (
-      <div className="overflow-hidden rounded-[1.75rem] border border-border bg-surface shadow-sm">
-        <div className="flex aspect-[4/5] items-center justify-center bg-surface-muted px-6 text-center">
-          <p className="text-sm text-text-muted">
-            Product image unavailable
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const imageUnavailable =
+    !currentImage || failedImages.includes(currentImage);
 
   return (
-    <div
-      className="min-w-0"
-      tabIndex={hasMultipleImages ? 0 : undefined}
-      onKeyDown={handleKeyDown}
+    <section
+      className="w-full min-w-0"
       aria-label={`${productName} image gallery`}
     >
-      {/* Main Image */}
-      <div className="overflow-hidden rounded-[1.75rem] border border-border bg-surface shadow-sm">
-        <div className="relative aspect-[4/5] overflow-hidden bg-surface-muted">
-          <img
-            src={currentImage}
-            alt={`${productName} - view ${activeImage + 1}`}
-            width="1000"
-            height="1250"
-            fetchPriority="high"
-            className="h-full w-full object-contain transition-transform duration-500 hover:scale-[1.015]"
-          />
+      <div className="relative overflow-hidden rounded-2xl border border-[#E9E1D7] bg-white">
+        <div
+          className="
+            relative flex w-full items-center justify-center
+            aspect-[3/4] max-h-[520px] sm:aspect-[4/5]
+            sm:max-h-[660px]
+            lg:aspect-auto lg:h-[min(76vh,700px)]
+            lg:min-h-[460px]
+          "
+        >
+          {imageUnavailable ? (
+            <div className="flex flex-col items-center gap-3 text-[#8B8177]">
+              <ImageOff size={38} strokeWidth={1.3} />
+              <p className="text-sm">Image unavailable</p>
+            </div>
+          ) : (
+            <img
+              key={currentImage}
+              src={currentImage}
+              alt={`${productName} — image ${safeActiveImage + 1}`}
+              className="
+                h-full w-full object-contain
+                p-0 transition-transform duration-500
+                sm:p-1 lg:p-2
+              "
+              onError={() => handleImageError(currentImage)}
+              draggable="false"
+            />
+          )}
 
-          {/* Product Badge */}
           {badge && (
-            <span className="absolute left-5 top-5 rounded-full border border-white/20 bg-primary px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-primary-foreground shadow-sm">
+            <span className="absolute left-4 top-4 z-10 rounded-full bg-[#6B1F2A] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white shadow-sm sm:left-5 sm:top-5">
               {badge}
             </span>
           )}
 
-          {/* Image Counter */}
-          {hasMultipleImages && (
-            <div className="absolute bottom-5 right-5 rounded-full border border-white/60 bg-white/85 px-3 py-1.5 text-[10px] font-bold tracking-[0.08em] text-text backdrop-blur-md">
-              {activeImage + 1} / {images.length}
-            </div>
+          {imageCount > 1 && (
+            <span className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-xs font-medium text-[#38302B] backdrop-blur-sm sm:bottom-5 sm:left-5">
+              {safeActiveImage + 1} / {imageCount}
+            </span>
           )}
 
-          {/* Previous Button */}
-          {hasMultipleImages && (
+          {!imageUnavailable && (
             <button
               type="button"
-              onClick={showPreviousImage}
-              aria-label="Previous product image"
-              className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-text shadow-sm backdrop-blur-md transition hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+              onClick={() => setIsZoomed(true)}
+              aria-label="View larger product image"
+              className="
+                absolute bottom-4 right-4 flex h-10 w-10
+                items-center justify-center rounded-full
+                border border-[#E9E1D7] bg-white/95 text-[#38302B]
+                shadow-sm transition hover:bg-[#6B1F2A]
+                hover:text-white sm:bottom-5 sm:right-5
+              "
             >
-              <ChevronLeft
-                size={18}
-                aria-hidden="true"
-              />
+              <Maximize2 size={17} strokeWidth={1.7} />
             </button>
           )}
 
-          {/* Next Button */}
-          {hasMultipleImages && (
-            <button
-              type="button"
-              onClick={showNextImage}
-              aria-label="Next product image"
-              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-text shadow-sm backdrop-blur-md transition hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <ChevronRight
-                size={18}
-                aria-hidden="true"
-              />
-            </button>
+          {imageCount > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={showPrevious}
+                aria-label="Previous product image"
+                className="
+                  absolute left-3 top-1/2 flex h-10 w-10
+                  -translate-y-1/2 items-center justify-center
+                  rounded-full border border-[#E9E1D7] bg-white/95
+                  text-[#38302B] shadow-sm transition
+                  hover:bg-[#6B1F2A] hover:text-white
+                  sm:left-4 sm:h-11 sm:w-11
+                "
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <button
+                type="button"
+                onClick={showNext}
+                aria-label="Next product image"
+                className="
+                  absolute right-3 top-1/2 flex h-10 w-10
+                  -translate-y-1/2 items-center justify-center
+                  rounded-full border border-[#E9E1D7] bg-white/95
+                  text-[#38302B] shadow-sm transition
+                  hover:bg-[#6B1F2A] hover:text-white
+                  sm:right-4 sm:h-11 sm:w-11
+                "
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {/* Thumbnail Gallery */}
-      {hasMultipleImages && (
+      {imageCount > 1 && (
         <div
-          className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5"
-          role="list"
+          className="mt-3 grid grid-cols-4 gap-2.5 sm:mt-4 sm:grid-cols-5 sm:gap-3"
           aria-label="Product image thumbnails"
         >
-          {images.map((image, index) => {
-            const isActive = activeImage === index;
+          {validImages.map((image, index) => {
+            const isActive = safeActiveImage === index;
+            const isUnavailable = failedImages.includes(image);
 
             return (
               <button
                 key={`${image}-${index}`}
                 type="button"
                 onClick={() => setActiveImage(index)}
-                aria-label={`View ${productName} image ${index + 1}`}
-                aria-current={isActive ? "true" : undefined}
-                className={`group overflow-hidden rounded-2xl border bg-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 ${
-                  isActive
-                    ? "border-primary ring-2 ring-primary/10"
-                    : "border-border hover:border-primary/40"
-                }`}
+                aria-label={`View product image ${index + 1}`}
+                aria-pressed={isActive}
+                className={`
+                  group relative aspect-[4/5] overflow-hidden
+                  rounded-xl border bg-white p-1
+                  transition duration-200
+                  ${
+                    isActive
+                      ? "border-[#6B1F2A] ring-1 ring-[#6B1F2A]"
+                      : "border-[#E9E1D7] hover:border-[#B08D57]"
+                  }
+                `}
               >
-                <div className="aspect-square overflow-hidden bg-surface-muted">
+                {isUnavailable ? (
+                  <span className="flex h-full items-center justify-center text-[#8B8177]">
+                    <ImageOff size={18} />
+                  </span>
+                ) : (
                   <img
                     src={image}
                     alt={`${productName} thumbnail ${index + 1}`}
-                    width="300"
-                    height="300"
                     loading="lazy"
-                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                    onError={() => handleImageError(image)}
+                    className="
+                      h-full w-full rounded-lg object-contain
+                      transition duration-300
+                      group-hover:scale-[1.03]
+                    "
                   />
-                </div>
+                )}
+
+                {isActive && (
+                  <span className="absolute inset-x-2 bottom-1 h-0.5 rounded-full bg-[#6B1F2A]" />
+                )}
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Keyboard Hint */}
-      {hasMultipleImages && (
-        <p className="mt-3 text-center text-[11px] text-text-muted">
-          Use ← and → keys to browse images
-        </p>
+      <p className="mt-3 text-center text-[10px] tracking-wide text-[#8B8177] sm:text-[11px]">
+        Select an image to preview · Click enlarge to view details
+      </p>
+
+      {isZoomed && currentImage && !imageUnavailable && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#171310]/95 p-3 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Enlarged images of ${productName}`}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsZoomed(false);
+            }
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setIsZoomed(false)}
+            aria-label="Close enlarged image"
+            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 sm:right-6 sm:top-6"
+          >
+            <X size={22} />
+          </button>
+
+          <div className="flex h-full w-full max-w-6xl flex-col items-center justify-center">
+            <img
+              src={currentImage}
+              alt={`${productName} — enlarged image`}
+              className="max-h-[82vh] max-w-full object-contain"
+            />
+
+            <p className="mt-4 text-sm tracking-wide text-white/75">
+              {productName}
+              {imageCount > 1 && ` · ${safeActiveImage + 1} of ${imageCount}`}
+            </p>
+          </div>
+
+          {imageCount > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={showPrevious}
+                aria-label="Previous enlarged image"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 sm:left-6 sm:h-12 sm:w-12"
+              >
+                <ChevronLeft size={22} />
+              </button>
+
+              <button
+                type="button"
+                onClick={showNext}
+                aria-label="Next enlarged image"
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 sm:right-6 sm:h-12 sm:w-12"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </>
+          )}
+        </div>
       )}
-    </div>
+    </section>
   );
-}
+};
 
 export default ProductGallery;

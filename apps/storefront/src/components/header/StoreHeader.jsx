@@ -26,7 +26,6 @@ function StoreHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
     useState(false);
 
-  // Cart drawer state is shared through Zustand.
   const isCartDrawerOpen = useCartStore(
     (state) => state.isCartDrawerOpen
   );
@@ -43,19 +42,16 @@ function StoreHeader() {
     (state) => state.items.length
   );
 
-  const cartCount = useCartStore(
-    (state) =>
-      state.items.reduce(
-        (total, item) => total + item.quantity,
-        0
-      )
+  const cartCount = useCartStore((state) =>
+    state.items.reduce(
+      (total, item) => total + item.quantity,
+      0
+    )
   );
 
   return (
     <>
-      {/* =========================================================
-          ANNOUNCEMENT BAR
-      ========================================================= */}
+      {/* Announcement bar */}
       <div className="relative overflow-hidden border-b border-white/10 bg-primary text-primary-foreground">
         <div className="store-announcement-track flex w-max items-center whitespace-nowrap py-2.5">
           <AnnouncementGroup />
@@ -63,46 +59,37 @@ function StoreHeader() {
         </div>
       </div>
 
-      {/* =========================================================
-          MAIN HEADER
-      ========================================================= */}
+      {/* Main header */}
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:h-[4.5rem] sm:px-6 lg:h-20 lg:px-8">
-          {/* =====================================================
-              MOBILE MENU BUTTON
-          ===================================================== */}
+        <div className="relative mx-auto grid h-16 max-w-[1440px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-1 px-3 sm:flex sm:h-[4.5rem] sm:justify-between sm:px-6 lg:h-20 lg:px-8">
+          {/* Mobile menu button */}
           <button
             type="button"
             aria-label={
-              isMobileMenuOpen
-                ? "Close menu"
-                : "Open menu"
+              isMobileMenuOpen ? "Close menu" : "Open menu"
             }
             aria-expanded={isMobileMenuOpen}
             onClick={() =>
               setIsMobileMenuOpen((value) => !value)
             }
-            className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 lg:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:h-10 sm:w-10 lg:hidden"
           >
             {isMobileMenuOpen ? (
               <X
-                size={21}
+                className="size-[19px] sm:size-[21px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
-                className="transition-transform duration-200 group-hover:rotate-90"
               />
             ) : (
               <Menu
-                size={21}
+                className="size-[19px] sm:size-[21px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
             )}
           </button>
 
-          {/* =====================================================
-              DESKTOP NAVIGATION
-          ===================================================== */}
+          {/* Desktop navigation */}
           <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
             {navItems.map((item) => (
               <NavLink
@@ -136,69 +123,63 @@ function StoreHeader() {
             ))}
           </nav>
 
-          {/* =====================================================
-              BRAND
-          ===================================================== */}
+          {/* Brand — always centered relative to the header */}
           <Link
             to="/"
             aria-label="Bajwa's Collection home"
-            className="absolute left-1/2 -translate-x-1/2 text-center"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center"
           >
-            <span className="block font-heading text-[19px] font-medium leading-none tracking-[0.1em] text-text sm:text-[21px] lg:text-2xl">
+            <span className="block whitespace-nowrap font-heading text-[14px] font-medium leading-none tracking-[0.035em] text-text min-[360px]:text-[16px] min-[360px]:tracking-[0.06em] sm:text-[21px] sm:tracking-[0.1em] lg:text-2xl">
               BAJWA&apos;S
             </span>
 
-            <span className="mt-1 block text-[7px] font-medium uppercase tracking-[0.4em] text-text-muted sm:text-[8px] lg:text-[9px]">
+            <span className="mt-1 block whitespace-nowrap text-[6px] font-medium uppercase tracking-[0.22em] text-text-muted min-[360px]:text-[7px] min-[360px]:tracking-[0.3em] sm:text-[8px] sm:tracking-[0.4em] lg:text-[9px]">
               Collection
             </span>
           </Link>
 
-          {/* =====================================================
-              HEADER ACTIONS
-          ===================================================== */}
-          <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
-            {/* Search */}
+          {/* Header actions */}
+          <div className="col-start-3 ml-0 flex items-center justify-self-end gap-0 min-[380px]:gap-0.5 sm:ml-auto sm:gap-1">
+            {/* Search — always visible */}
             <Link
               to="/search"
-              aria-label="Search"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:inline-flex"
+              aria-label="Search products"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:h-10 sm:w-10"
             >
               <Search
-                size={19}
+                className="size-[17px] sm:size-[19px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
             </Link>
 
-            {/* Account */}
+            {/* Account — visible from 640px upward */}
             <Link
               to="/account"
               aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:inline-flex"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:inline-flex"
             >
               <UserRound
-                size={19}
+                className="size-[19px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
             </Link>
 
-            {/* Wishlist */}
+            {/* Wishlist — always visible */}
             <Link
               to="/wishlist"
               aria-label={
                 wishlistCount > 0
                   ? `Wishlist, ${wishlistCount} ${
-                      wishlistCount === 1
-                        ? "item"
-                        : "items"
+                      wishlistCount === 1 ? "item" : "items"
                     }`
                   : "Wishlist"
               }
-              className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 md:inline-flex"
+              className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:h-10 sm:w-10"
             >
               <Heart
-                size={19}
+                className="size-[17px] sm:size-[19px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
@@ -213,63 +194,54 @@ function StoreHeader() {
               )}
             </Link>
 
-            {/* Shopping Bag */}
+            {/* Shopping bag — always visible */}
             <button
               type="button"
               onClick={openCartDrawer}
               aria-label={
                 cartCount > 0
                   ? `Shopping bag, ${cartCount} ${
-                      cartCount === 1
-                        ? "item"
-                        : "items"
+                      cartCount === 1 ? "item" : "items"
                     }`
                   : "Shopping bag"
               }
               aria-expanded={isCartDrawerOpen}
               aria-haspopup="dialog"
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent text-text transition hover:border-border hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:h-10 sm:w-10"
             >
               <ShoppingBag
-                size={19}
+                className="size-[17px] sm:size-[19px]"
                 strokeWidth={1.8}
                 aria-hidden="true"
               />
 
-              <span
-                aria-hidden="true"
-                className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground"
-              >
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
+              {cartCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[8px] font-bold leading-none text-primary-foreground"
+                >
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </header>
 
-      {/* =========================================================
-          MOBILE MENU
-      ========================================================= */}
+      {/* Mobile navigation drawer */}
       <MobileMenu
         open={isMobileMenuOpen}
-        onClose={() =>
-          setIsMobileMenuOpen(false)
-        }
+        onClose={() => setIsMobileMenuOpen(false)}
         items={navItems}
       />
 
-      {/* =========================================================
-          CART DRAWER
-          Shared with product-page Add to Bag actions.
-      ========================================================= */}
+      {/* Shared cart drawer */}
       <CartDrawer
         open={isCartDrawerOpen}
         onClose={closeCartDrawer}
       />
 
-      {/* =========================================================
-          ANNOUNCEMENT MARQUEE ANIMATION
-      ========================================================= */}
+      {/* Announcement animation */}
       <style>{`
         .store-announcement-track {
           animation: store-announcement-scroll 18s linear infinite;

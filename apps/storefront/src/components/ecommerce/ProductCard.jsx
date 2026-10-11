@@ -1,11 +1,5 @@
-import {
-  Heart,
-  Plus,
-} from "lucide-react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Heart, Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import Price from "../common/Price";
 import useCartStore from "../../store/cartStore";
@@ -35,11 +29,7 @@ function getProductCategory(product) {
     return product.category;
   }
 
-  return (
-    product.category?.name ||
-    product.category?.title ||
-    ""
-  );
+  return product.category?.name || product.category?.title || "";
 }
 
 function getStockState(product) {
@@ -71,13 +61,8 @@ function ProductCard({
 }) {
   const navigate = useNavigate();
 
-  const addToCart = useCartStore(
-    (state) => state.addToCart
-  );
-
-  const openCartDrawer = useCartStore(
-    (state) => state.openCartDrawer
-  );
+  const addToCart = useCartStore((state) => state.addToCart);
+  const openCartDrawer = useCartStore((state) => state.openCartDrawer);
 
   const image = getProductImage(product);
   const category = getProductCategory(product);
@@ -95,14 +80,8 @@ function ProductCard({
   const isSoldOut = stockState === "sold-out";
   const isLowStock = stockState === "low-stock";
 
-  const hasSizes =
-    Array.isArray(product.sizes) &&
-    product.sizes.length > 0;
-
-  const hasColors =
-    Array.isArray(product.colors) &&
-    product.colors.length > 0;
-
+  const hasSizes = Array.isArray(product.sizes) && product.sizes.length > 0;
+  const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
   const requiresOptions = hasSizes || hasColors;
 
   const handleWishlistClick = (event) => {
@@ -120,21 +99,63 @@ function ProductCard({
       return;
     }
 
-    // Products with variants need selection on the product page.
     if (requiresOptions) {
       navigate(`/product/${product.slug}`);
       return;
     }
 
-    // Add products without variants directly to the cart.
     addToCart(product, 1);
-
-    // Open the shared drawer when its store action is available.
     openCartDrawer?.();
   };
 
+  const wishlistLabel = isWishlisted
+    ? `Remove ${product.name} from wishlist`
+    : `Add ${product.name} to wishlist`;
+
+  const wishlistButtonClass = isWishlisted
+    ? "border-primary bg-primary text-primary-foreground"
+    : "border-border bg-surface text-text hover:border-primary hover:text-primary";
+
   return (
     <article className="group min-w-0">
+      {/* Mobile and tablet: keep badges outside the photo */}
+      <div className="mb-2 flex min-h-9 items-center justify-between gap-2 md:hidden">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          {badge && (
+            <span className="max-w-[8.5rem] truncate rounded-full bg-primary px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
+              {badge}
+            </span>
+          )}
+
+          {isLowStock && !isSoldOut && (
+            <span className="rounded-full bg-surface-muted px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.08em] text-warning">
+              Low Stock
+            </span>
+          )}
+
+          {isSoldOut && (
+            <span className="rounded-full bg-text px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
+              Sold Out
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleWishlistClick}
+          aria-label={wishlistLabel}
+          aria-pressed={isWishlisted}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${wishlistButtonClass}`}
+        >
+          <Heart
+            size={15}
+            strokeWidth={isWishlisted ? 2.5 : 1.9}
+            fill={isWishlisted ? "currentColor" : "none"}
+          />
+        </button>
+      </div>
+
+      {/* Product image */}
       <div className="relative overflow-hidden rounded-2xl bg-surface-muted">
         <Link
           to={`/product/${product.slug}`}
@@ -150,9 +171,7 @@ function ProductCard({
                 width="600"
                 height="800"
                 className={`h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03] ${
-                  isSoldOut
-                    ? "opacity-55 grayscale-[0.2]"
-                    : ""
+                  isSoldOut ? "opacity-55 grayscale-[0.2]" : ""
                 }`}
               />
             ) : (
@@ -166,7 +185,8 @@ function ProductCard({
           </div>
         </Link>
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
+        {/* Desktop: preserve existing image-overlay badges */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 hidden items-start justify-between p-3 md:flex">
           <div className="flex flex-col gap-2">
             {badge && (
               <span className="rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-primary-foreground shadow-sm">
@@ -190,11 +210,7 @@ function ProductCard({
           <button
             type="button"
             onClick={handleWishlistClick}
-            aria-label={
-              isWishlisted
-                ? `Remove ${product.name} from wishlist`
-                : `Add ${product.name} to wishlist`
-            }
+            aria-label={wishlistLabel}
             aria-pressed={isWishlisted}
             className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-200 ${
               isWishlisted
@@ -205,15 +221,12 @@ function ProductCard({
             <Heart
               size={17}
               strokeWidth={isWishlisted ? 2.5 : 1.9}
-              fill={
-                isWishlisted
-                  ? "currentColor"
-                  : "none"
-              }
+              fill={isWishlisted ? "currentColor" : "none"}
             />
           </button>
         </div>
 
+        {/* Quick add */}
         {showQuickAdd && !isSoldOut && (
           <div className="pointer-events-none absolute inset-x-3 bottom-3 opacity-0 transition duration-300 group-hover:pointer-events-auto group-hover:opacity-100 max-sm:hidden">
             <button
@@ -228,6 +241,7 @@ function ProductCard({
         )}
       </div>
 
+      {/* Product information */}
       <div className="pt-4">
         {category && (
           <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted">
@@ -248,9 +262,7 @@ function ProductCard({
           <Price
             price={product.price}
             compareAtPrice={
-              hasComparePrice
-                ? product.compareAtPrice
-                : undefined
+              hasComparePrice ? product.compareAtPrice : undefined
             }
           />
         </div>
