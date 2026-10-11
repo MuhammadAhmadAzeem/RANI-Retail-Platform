@@ -11,10 +11,10 @@ const collections = [
       "The latest arrivals, freshly curated for the season",
 
     image:
-      "https://images.pexels.com/photos/36325924/pexels-photo-36325924.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      "https://images.pexels.com/photos/36552685/pexels-photo-36552685.jpeg?auto=compress&cs=tinysrgb&w=1400",
 
     bannerImage:
-      "https://images.pexels.com/photos/36325924/pexels-photo-36325924.jpeg?auto=compress&cs=tinysrgb&w=1800",
+      "https://images.pexels.com/photos/29413595/pexels-photo-29413595.jpeg?auto=compress&cs=tinysrgb&w=1800",
 
     status: "active",
 
@@ -50,10 +50,10 @@ const collections = [
       "Timeless pieces that define the Bajwa's Collection aesthetic",
 
     image:
-      "https://images.pexels.com/photos/35565657/pexels-photo-35565657.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      "https://images.pexels.com/photos/29413562/pexels-photo-29413562.jpeg?auto=compress&cs=tinysrgb&w=1400",
 
     bannerImage:
-      "https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=1800",
+      "https://images.pexels.com/photos/22431182/pexels-photo-22431182.jpeg?auto=compress&cs=tinysrgb&w=1800",
 
     status: "active",
 
@@ -89,10 +89,10 @@ const collections = [
       "Elegant eastern pieces for festive occasions",
 
     image:
-      "https://images.pexels.com/photos/31323178/pexels-photo-31323178.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      "https://images.pexels.com/photos/29413567/pexels-photo-29413567.jpeg?auto=compress&cs=tinysrgb&w=1400",
 
     bannerImage:
-      "https://images.pexels.com/photos/25184992/pexels-photo-25184992.jpeg?auto=compress&cs=tinysrgb&w=1800",
+      "https://images.pexels.com/photos/33300894/pexels-photo-33300894.jpeg?auto=compress&cs=tinysrgb&w=1800",
 
     status: "active",
 
@@ -126,10 +126,10 @@ const collections = [
       "Effortless pieces for everyday wardrobes",
 
     image:
-      "https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      "https://images.pexels.com/photos/22064203/pexels-photo-22064203.jpeg?auto=compress&cs=tinysrgb&w=1400",
 
     bannerImage:
-      "https://images.pexels.com/photos/36325924/pexels-photo-36325924.jpeg?auto=compress&cs=tinysrgb&w=1800",
+      "https://images.pexels.com/photos/36552685/pexels-photo-36552685.jpeg?auto=compress&cs=tinysrgb&w=1800",
 
     status: "active",
 
@@ -165,10 +165,10 @@ const collections = [
       "Classic eastern silhouettes with a modern perspective",
 
     image:
-      "https://images.pexels.com/photos/31874432/pexels-photo-31874432.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      "https://images.pexels.com/photos/27284030/pexels-photo-27284030.jpeg?auto=compress&cs=tinysrgb&w=1400",
 
     bannerImage:
-      "https://images.pexels.com/photos/20777169/pexels-photo-20777169.jpeg?auto=compress&cs=tinysrgb&w=1800",
+      "https://images.pexels.com/photos/20593509/pexels-photo-20593509.jpeg?auto=compress&cs=tinysrgb&w=1800",
 
     status: "active",
 

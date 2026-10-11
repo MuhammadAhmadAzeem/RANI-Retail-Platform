@@ -32,6 +32,15 @@ export const router = createBrowserRouter([
         }),
       },
 
+      // All collections listing
+      {
+        path: "collections",
+        lazy: async () => ({
+          Component: (await import("../pages/Collections")).default,
+        }),
+      },
+
+      // Individual collection details
       {
         path: "collection/:slug",
         lazy: async () => ({
