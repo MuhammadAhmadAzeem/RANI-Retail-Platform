@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import StoreLayout from "../layouts/StoreLayout";
 
@@ -193,6 +192,37 @@ export const router = createBrowserRouter([
           Component: (
             await import("../pages/checkout/OrderSuccess")
           ).default,
+        }),
+      },
+
+      // =========================================================
+      // STATIC CONTENT PAGES
+      // =========================================================
+      {
+        path: "about",
+        lazy: async () => ({
+          Component: (await import("../pages/About")).default,
+        }),
+      },
+
+      {
+        path: "contact",
+        lazy: async () => ({
+          Component: (await import("../pages/Contact")).default,
+        }),
+      },
+
+      {
+        path: "privacy",
+        lazy: async () => ({
+          Component: (await import("../pages/Privacy")).default,
+        }),
+      },
+
+      {
+        path: "terms",
+        lazy: async () => ({
+          Component: (await import("../pages/Terms")).default,
         }),
       },
 
