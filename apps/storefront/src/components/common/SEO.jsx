@@ -252,13 +252,20 @@ function SEO({
     const requestedImage =
         image || routeMetadata.image || siteConfig.seo.ogImage;
 
+    const imageOrigin =
+        publicOrigin ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+
     let absoluteImage = "";
 
     try {
         if (/^https?:\/\//i.test(requestedImage)) {
             absoluteImage = requestedImage;
-        } else if (publicOrigin) {
-            absoluteImage = new URL(requestedImage, publicOrigin).href;
+        } else if (imageOrigin && requestedImage) {
+            absoluteImage = new URL(
+                requestedImage,
+                imageOrigin
+            ).href;
         }
     } catch {
         absoluteImage = "";
