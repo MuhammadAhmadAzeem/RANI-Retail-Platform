@@ -1,3 +1,4 @@
+
 import {
   ArrowUpRight,
   Camera,
@@ -6,6 +7,8 @@ import {
   Phone,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
+import useCookieStore from "../../store/cookieStore";
 
 const footerLinks = [
   { label: "Shop", to: "/shop" },
@@ -22,7 +25,14 @@ const customerLinks = [
   { label: "Returns & Exchange", to: "/account/returns" },
 ];
 
+const footerLinkClass =
+  "block text-sm text-white/75 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white";
+
 function StoreFooter() {
+  const openPreferences = useCookieStore(
+    (state) => state.openPreferences
+  );
+
   return (
     <footer className="mt-20 border-t border-border bg-charcoal text-white">
       <div className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 lg:py-18">
@@ -38,16 +48,17 @@ function StoreFooter() {
             </p>
 
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/60">
-              Thoughtfully designed fashion for modern wardrobes, presented
-              through a refined digital shopping experience powered by RANI.
+              Thoughtfully designed fashion for modern wardrobes,
+              presented through a refined digital shopping experience
+              powered by RANI.
             </p>
 
             <a
               href="#top"
-              className="mt-7 inline-flex items-center gap-2 text-sm text-white/80 transition hover:text-white"
+              className="mt-7 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               Back to top
-              <ArrowUpRight size={16} />
+              <ArrowUpRight size={16} aria-hidden="true" />
             </a>
           </div>
 
@@ -57,12 +68,12 @@ function StoreFooter() {
               Explore
             </h2>
 
-            <nav className="mt-5 space-y-3">
+            <nav aria-label="Explore" className="mt-5 space-y-3">
               {footerLinks.map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
-                  className="block text-sm text-white/75 transition hover:text-white"
+                  className={footerLinkClass}
                 >
                   {item.label}
                 </Link>
@@ -76,30 +87,36 @@ function StoreFooter() {
               Customer Care
             </h2>
 
-            <nav className="mt-5 space-y-3">
+            <nav
+              aria-label="Customer care"
+              className="mt-5 space-y-3"
+            >
               {customerLinks.map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
-                  className="block text-sm text-white/75 transition hover:text-white"
+                  className={footerLinkClass}
                 >
                   {item.label}
                 </Link>
               ))}
 
-              <Link
-                to="/privacy"
-                className="block text-sm text-white/75 transition hover:text-white"
-              >
+              <Link to="/privacy" className={footerLinkClass}>
                 Privacy Policy
               </Link>
 
-              <Link
-                to="/terms"
-                className="block text-sm text-white/75 transition hover:text-white"
-              >
+              <Link to="/terms" className={footerLinkClass}>
                 Terms & Conditions
               </Link>
+
+              {/* Day 19: reopen saved cookie preferences */}
+              <button
+                type="button"
+                onClick={openPreferences}
+                className={`${footerLinkClass} text-left`}
+              >
+                Cookie Preferences
+              </button>
             </nav>
           </div>
 
@@ -110,32 +127,52 @@ function StoreFooter() {
             </h2>
 
             <div className="mt-5 space-y-4 text-sm text-white/70">
-              <div className="flex gap-3">
-                <MapPin size={18} className="mt-0.5 shrink-0" />
+              <div className="flex items-start gap-3">
+                <MapPin
+                  size={18}
+                  className="mt-0.5 shrink-0"
+                  aria-hidden="true"
+                />
+
                 <span>
                   Business address will be added before production.
                 </span>
               </div>
 
-              <div className="flex gap-3">
-                <Phone size={18} className="shrink-0" />
+              <div className="flex items-start gap-3">
+                <Phone
+                  size={18}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
+
                 <span>+92 XXX XXXXXXX</span>
               </div>
 
-              <div className="flex gap-3">
-                <Mail size={18} className="shrink-0" />
+              <div className="flex items-start gap-3">
+                <Mail
+                  size={18}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
+
                 <span>hello@bajwascollection.com</span>
               </div>
 
-              <div className="flex gap-3">
-                <Camera size={18} className="shrink-0" />
+              <div className="flex items-start gap-3">
+                <Camera
+                  size={18}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
+
                 <span>@bajwascollection</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom */}
+        {/* Copyright */}
         <div className="mt-12 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} Bajwa's Collection. All rights

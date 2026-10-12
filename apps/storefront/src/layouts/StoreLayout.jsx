@@ -1,5 +1,8 @@
+
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+
+import CookieBanner from "../components/common/CookieBanner";
 import StoreFooter from "../components/footer/StoreFooter";
 import StoreHeader from "../components/header/StoreHeader";
 
@@ -23,6 +26,8 @@ function StoreLayout() {
       </main>
 
       <StoreFooter />
+
+      <CookieBanner />
     </div>
   );
 }
