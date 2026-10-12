@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+# Configure VITE_SITE_URL before deployment to publish the sitemap URL.

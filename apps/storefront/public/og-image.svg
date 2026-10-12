@@ -1,0 +1,261 @@
+
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200"
+     height="630"
+     viewBox="0 0 1200 630"
+     preserveAspectRatio="xMidYMid meet"
+     style="display:block;width:min(100vw,190.476vh);height:min(52.5vw,100vh);margin:0 auto;overflow:hidden">
+
+
+  <title>Bajwa's Collection — Contemporary Pakistani Fashion</title>
+  <desc>Premium Pakistani fashion branding in burgundy, ivory and antique gold, powered by RANI.</desc>
+
+  <defs>
+    <linearGradient id="burgundy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#762833"/>
+      <stop offset="52%" stop-color="#6B1F2A"/>
+      <stop offset="100%" stop-color="#45151E"/>
+    </linearGradient>
+
+    <linearGradient id="ivory" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="45%" stop-color="#FFFDF8"/>
+      <stop offset="100%" stop-color="#E9DFC9"/>
+    </linearGradient>
+
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#806137"/>
+      <stop offset="30%" stop-color="#DCC18A"/>
+      <stop offset="65%" stop-color="#B08D57"/>
+      <stop offset="100%" stop-color="#E5D09D"/>
+    </linearGradient>
+
+    <linearGradient id="goldVertical" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E7D2A0"/>
+      <stop offset="50%" stop-color="#B08D57"/>
+      <stop offset="100%" stop-color="#8B693C"/>
+    </linearGradient>
+
+    <pattern id="fineTexture"
+             width="34" height="34"
+             patternUnits="userSpaceOnUse">
+      <path d="M0 34L34 0"
+            stroke="#FFFFFF"
+            stroke-width=".5"
+            opacity=".035"/>
+    </pattern>
+
+    <filter id="letterGlow"
+            x="-25%" y="-25%"
+            width="150%" height="150%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="1200" height="630" fill="#F7F3EC"/>
+
+  <!-- Right luxury panel -->
+  <rect x="790" width="410" height="630" fill="url(#burgundy)"/>
+  <rect x="790" width="410" height="630" fill="url(#fineTexture)"/>
+
+  <!-- Architectural separation -->
+  <path d="M790 0V630"
+        stroke="url(#goldVertical)"
+        stroke-width="2"/>
+
+  <path d="M807 0V630"
+        stroke="#D8BC82"
+        stroke-width=".7"
+        opacity=".55"/>
+
+  <!-- Left editorial branding -->
+  <text x="88" y="104"
+        fill="#6B1F2A"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="25"
+        letter-spacing="5.5">
+    BAJWA'S
+  </text>
+
+  <text x="90" y="136"
+        fill="#8B693C"
+        font-family="Arial, sans-serif"
+        font-size="12"
+        letter-spacing="5.5">
+    COLLECTION
+  </text>
+
+  <path d="M89 165H660"
+        stroke="url(#gold)"
+        stroke-width="1.6"/>
+
+  <path d="M89 174H250"
+        stroke="#B08D57"
+        stroke-width=".6"
+        opacity=".6"/>
+
+  <!-- Headline -->
+  <text x="86" y="264"
+        fill="#28201E"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="57"
+        letter-spacing="-1.6">
+    Contemporary
+  </text>
+
+  <text x="86" y="333"
+        fill="#6B1F2A"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="53"
+        letter-spacing="-1.5">
+    Pakistani Fashion
+  </text>
+
+  <!-- Fine editorial accent -->
+  <path d="M91 366H151"
+        stroke="url(#gold)"
+        stroke-width="3"/>
+
+  <circle cx="157" cy="366" r="2"
+          fill="#B08D57"/>
+
+  <!-- Supporting copy -->
+  <text x="90" y="409"
+        fill="#74665D"
+        font-family="Arial, sans-serif"
+        font-size="18">
+    Eastern wear · Timeless silhouettes
+  </text>
+
+  <text x="90" y="440"
+        fill="#74665D"
+        font-family="Arial, sans-serif"
+        font-size="18">
+    Refined details for modern wardrobes
+  </text>
+
+  <!-- Footer -->
+  <path d="M90 494H660"
+        stroke="#D9C9B0"
+        stroke-width="1"/>
+
+  <text x="90" y="535"
+        fill="#6B1F2A"
+        font-family="Arial, sans-serif"
+        font-size="12"
+        letter-spacing="3.2">
+    POWERED BY RANI
+  </text>
+
+  <text x="90" y="560"
+        fill="#948574"
+        font-family="Arial, sans-serif"
+        font-size="10"
+        letter-spacing="1.8">
+    DESIGNED WITH A SENSE OF TIMELESSNESS
+  </text>
+
+  <!-- Right bespoke architectural emblem -->
+  <path d="M850 500V240
+           C850 151 917 91 1000 91
+           C1083 91 1150 151 1150 240
+           V500"
+        fill="none"
+        stroke="url(#goldVertical)"
+        stroke-width="1.6"/>
+
+  <path d="M866 500V242
+           C866 163 926 108 1000 108
+           C1074 108 1134 163 1134 242
+           V500"
+        fill="none"
+        stroke="#E2CA94"
+        stroke-width=".7"
+        opacity=".75"/>
+
+  <!-- Subtle Mughal-inspired crown -->
+  <path d="M974 113
+           Q987 99 1000 80
+           Q1013 99 1026 113"
+        fill="none"
+        stroke="url(#goldVertical)"
+        stroke-width="1.4"/>
+
+  <path d="M985 119Q1000 102 1015 119"
+        fill="none"
+        stroke="#D9BD80"
+        stroke-width=".8"/>
+
+  <!-- Restrained side ornaments -->
+  <path d="M882 258V435M1118 258V435"
+        stroke="#B08D57"
+        stroke-width=".8"
+        opacity=".65"/>
+
+  <path d="M875 245H889M1111 245H1125"
+        stroke="#D9BD80"
+        stroke-width="1"/>
+
+  <!-- Bright ivory B monogram -->
+  <text x="1000" y="374"
+        text-anchor="middle"
+        fill="#FFFFFF"
+        opacity=".28"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="194"
+        filter="url(#letterGlow)">B</text>
+
+  <text x="1000" y="374"
+        text-anchor="middle"
+        fill="url(#ivory)"
+        stroke="#FFFFFF"
+        stroke-width=".55"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="194">B</text>
+
+  <!-- Monogram finishing detail -->
+  <path d="M952 405H1048"
+        stroke="url(#gold)"
+        stroke-width="1.5"/>
+
+  <path d="M974 413H1026"
+        stroke="#E5CC91"
+        stroke-width=".7"/>
+
+  <!-- Brand signature -->
+  <text x="1000" y="452"
+        text-anchor="middle"
+        fill="#FFFDF8"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="16"
+        letter-spacing="2.5">
+    BAJWA'S
+  </text>
+
+  <text x="1000" y="476"
+        text-anchor="middle"
+        fill="#E0C58D"
+        font-family="Arial, sans-serif"
+        font-size="10"
+        letter-spacing="3.6">
+    COLLECTION
+  </text>
+
+  <!-- Bottom frame -->
+  <path d="M864 516H1136"
+        stroke="#B08D57"
+        stroke-width=".8"
+        opacity=".8"/>
+
+  <path d="M920 526H1080"
+        stroke="#D7BC84"
+        stroke-width=".5"
+        opacity=".65"/>
+
+</svg>

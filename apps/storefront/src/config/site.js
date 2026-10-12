@@ -10,7 +10,7 @@ const siteConfig = {
 
   site: {
     name: "Bajwa's Collection",
-    url: "http://localhost:5173",
+    url: (import.meta.env.VITE_SITE_URL || "").trim().replace(/\/+$/, ""),
     locale: "en-PK",
     language: "en",
     currency: "PKR",
@@ -95,12 +95,39 @@ export const getPageTitle = (title) => {
   return siteConfig.seo.titleTemplate.replace("%s", title);
 };
 
-export const getCanonicalUrl = (path = "/") => {
+export const getCanonicalUrl = (path = "/", origin = siteConfig.site.url) => {
   const normalizedPath = path.startsWith("/")
     ? path
     : `/${path}`;
 
-  return `${siteConfig.site.url}${normalizedPath}`;
+  if (!origin) {
+    return "";
+  }
+
+  try {
+    const url = new URL(origin);
+
+    if (!["https:", "http:"].includes(url.protocol)) {
+      return "";
+    }
+
+    const hostname = url.hostname.toLowerCase();
+
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "0.0.0.0" ||
+      hostname === "::1" ||
+      hostname.endsWith(".localhost") ||
+      hostname.endsWith(".local")
+    ) {
+      return "";
+    }
+
+    return new URL(normalizedPath, url.origin).href;
+  } catch {
+    return "";
+  }
 };
 
 export default siteConfig;
