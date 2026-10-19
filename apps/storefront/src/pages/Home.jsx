@@ -1,3 +1,4 @@
+
 import {
   ArrowRight,
   ChevronRight,
@@ -8,6 +9,7 @@ import { Link } from "react-router-dom";
 
 import ProductGrid from "../components/ecommerce/ProductGrid";
 import { getNewArrivals } from "../data/mock/products";
+import { getResponsivePexelsSrcSet } from "../utils/responsivePexelsImage";
 
 const categories = [
   {
@@ -115,6 +117,10 @@ function ImageLink({
     >
       <img
         src={image}
+        srcSet={getResponsivePexelsSrcSet(image, [320, 480, 640, 800, 1000, 1200, 1400])}
+
+        sizes="(min-width: 1440px) 440px, (min-width: 1024px) calc(33.333vw - 40px), (min-width: 640px) calc(50vw - 38px), calc(100vw - 40px)"
+
         alt={`${title} eastern fashion collection`}
         className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.035]"
         loading="lazy"
@@ -220,13 +226,25 @@ export default function Home() {
           </div>
 
           <div className="relative min-h-[430px] overflow-hidden lg:min-h-full">
-            <img
-              src="https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=1800"
-              alt="Bajwa's Collection eastern fashion campaign"
-              className="absolute inset-0 h-full w-full object-cover object-[50%_18%] lg:object-[50%_16%]"
-              fetchPriority="high"
-              decoding="async"
-            />
+            <picture className="absolute inset-0 block h-full w-full">
+              <source
+                media="(max-width: 767px)"
+                srcSet={getResponsivePexelsSrcSet(
+                  "https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=960",
+                  [320, 480, 640, 800, 960]
+                )}
+                sizes="100vw"
+              />
+              <img
+                src="https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=960"
+                srcSet={getResponsivePexelsSrcSet("https://images.pexels.com/photos/35562718/pexels-photo-35562718.jpeg?auto=compress&cs=tinysrgb&w=1800", [480, 640, 800, 960, 1280, 1600, 1800])}
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                alt="Bajwa's Collection eastern fashion campaign"
+                className="absolute inset-0 h-full w-full object-cover object-[50%_18%] lg:object-[50%_16%]"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
 
             <div className="absolute inset-0 bg-linear-to-r from-[#211E1D] via-[#211E1D]/5 to-transparent lg:from-[#211E1D]/40 lg:via-transparent" />
 
@@ -316,6 +334,8 @@ export default function Home() {
           <div className="relative min-h-[410px] lg:min-h-[560px]">
             <img
               src={editImages.main}
+              srcSet={getResponsivePexelsSrcSet(editImages.main, [320, 480, 640, 800, 1000, 1200, 1400])}
+              sizes="(min-width: 1024px) 55vw, 100vw"
               alt="Elegant eastern wear from Bajwa's Collection"
               className="absolute inset-0 h-full w-full object-cover object-center"
               loading="lazy"
@@ -345,7 +365,7 @@ export default function Home() {
 
               <p className="mt-6 text-[13px] leading-6 text-white/68 sm:text-sm">
                 Thoughtful eastern essentials made for the way modern life
-                moves — understated, versatile, and rooted in familiar
+                moves Ã¢â‚¬â€ understated, versatile, and rooted in familiar
                 craft.
               </p>
 
@@ -380,6 +400,8 @@ export default function Home() {
           >
             <img
               src={editImages.detail}
+              srcSet={getResponsivePexelsSrcSet(editImages.detail, [320, 480, 640, 800, 1000])}
+              sizes="(min-width: 1024px) 55vw, 100vw"
               alt="Two models wearing contemporary eastern fashion"
               className="absolute inset-0 h-full w-full object-cover object-[50%_18%] transition-transform duration-700 group-hover:scale-[1.02]"
               loading="lazy"
@@ -411,6 +433,8 @@ export default function Home() {
             >
               <img
                 src="https://images.pexels.com/photos/19487469/pexels-photo-19487469.jpeg?auto=compress&cs=tinysrgb&w=1000"
+                srcSet={getResponsivePexelsSrcSet("https://images.pexels.com/photos/19487469/pexels-photo-19487469.jpeg?auto=compress&cs=tinysrgb&w=1000", [160, 240, 320, 480, 640, 800, 1000])}
+                sizes="(min-width: 1024px) 32vw, (min-width: 640px) calc(50vw - 38px), calc(50vw - 26px)"
                 alt="Embroidered Pakistani festive fashion"
                 className="absolute inset-0 h-full w-full object-cover object-[50%_12%] transition-transform duration-700 group-hover:scale-[1.02]"
                 loading="lazy"
@@ -441,6 +465,8 @@ export default function Home() {
             >
               <img
                 src={editImages.fabric}
+                srcSet={getResponsivePexelsSrcSet(editImages.fabric, [160, 240, 320, 480, 640, 800, 1000])}
+                sizes="(min-width: 1024px) 32vw, (min-width: 640px) calc(50vw - 38px), calc(50vw - 26px)"
                 alt="Detailed textile texture and eastern fabric"
                 className="absolute inset-0 h-full w-full object-cover object-[50%_10%] transition-transform duration-700 group-hover:scale-[1.02]"
                 loading="lazy"
@@ -539,7 +565,7 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-3 max-w-md text-[13px] leading-6 text-muted-foreground sm:text-sm">
-                  New arrivals, collection updates, and early access — kept
+                  New arrivals, collection updates, and early access Ã¢â‚¬â€ kept
                   simple.
                 </p>
               </div>

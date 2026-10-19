@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import Price from "../common/Price";
 import useCartStore from "../../store/cartStore";
+import { getResponsivePexelsSrcSet } from "../../utils/responsivePexelsImage";
 
 function getProductImage(product) {
   if (Array.isArray(product.images)) {
@@ -166,6 +167,8 @@ function ProductCard({
             {image ? (
               <img
                 src={image}
+                srcSet={getResponsivePexelsSrcSet(image, [240, 320, 480, 640, 800, 1000])}
+                sizes="(min-width: 1280px) 280px, (min-width: 1024px) 25vw, (min-width: 640px) 45vw, 50vw"
                 alt={product.imageAlt || product.name}
                 loading="lazy"
                 width="600"

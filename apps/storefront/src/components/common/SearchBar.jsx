@@ -1,12 +1,5 @@
-import {
-  Search,
-  X,
-} from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import useDebounce from "../../hooks/useDebounce";
 import { cn } from "../../lib/cn";
@@ -25,18 +18,37 @@ function SearchBar({
 }) {
   const [value, setValue] = useState(defaultValue);
 
-  const debouncedValue = useDebounce(
-    value,
-    debounceDelay
-  );
+  const debouncedValue = useDebounce(value, debounceDelay);
 
-  const hasMounted = useRef(false);
+  // Keep the latest callback without making the search effect
+  // depend on a callback that may change on every parent render.
+  const onSearchRef = useRef(onSearch);
+
+  const lastHandledSearch = useRef({
+    value: debouncedValue,
+    minSearchLength,
+  });
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
+  useEffect(() => {
+    const previous = lastHandledSearch.current;
+
+    // Ignore unchanged search values.
+    if (
+      previous.value === debouncedValue &&
+      previous.minSearchLength === minSearchLength
+    ) {
       return;
     }
+
+    // Record the value before notifying the parent.
+    lastHandledSearch.current = {
+      value: debouncedValue,
+      minSearchLength,
+    };
 
     const normalizedValue = debouncedValue.trim();
 
@@ -44,13 +56,9 @@ function SearchBar({
       normalizedValue.length === 0 ||
       normalizedValue.length >= minSearchLength
     ) {
-      onSearch?.(normalizedValue);
+      onSearchRef.current?.(normalizedValue);
     }
-  }, [
-    debouncedValue,
-    minSearchLength,
-    onSearch,
-  ]);
+  }, [debouncedValue, minSearchLength]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -68,8 +76,15 @@ function SearchBar({
   };
 
   const handleClear = () => {
+    // Prevent the debounced empty value from triggering
+    // the same search update a second time.
+    lastHandledSearch.current = {
+      value: "",
+      minSearchLength,
+    };
+
     setValue("");
-    onSearch?.("");
+    onSearchRef.current?.("");
   };
 
   return (
@@ -90,9 +105,7 @@ function SearchBar({
       <input
         type="search"
         value={value}
-        onChange={(event) =>
-          setValue(event.target.value)
-        }
+        onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
         disabled={disabled}
         aria-label={placeholder}
@@ -111,7 +124,7 @@ function SearchBar({
           aria-label="Clear search"
           className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-text-muted transition hover:bg-surface-muted hover:text-primary disabled:pointer-events-none disabled:opacity-50"
         >
-          <X size={15} />
+          <X size={15} aria-hidden="true" />
         </button>
       )}
 

@@ -1,9 +1,15 @@
-import { createBrowserRouter } from "react-router-dom";
+﻿import { createBrowserRouter } from "react-router-dom";
+
+import { RouteErrorElement } from "../components/common/ErrorBoundary";
+
 import StoreLayout from "../layouts/StoreLayout";
 
 export const router = createBrowserRouter([
   {
     element: <StoreLayout />,
+    hydrateFallbackElement: <StoreLayout />,
+    errorElement: <RouteErrorElement />,
+
     children: [
       // =========================================================
       // HOME
@@ -98,6 +104,7 @@ export const router = createBrowserRouter([
             await import("../layouts/ProtectedAccountLayout")
           ).default,
         }),
+
         children: [
           {
             index: true,
